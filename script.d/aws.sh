@@ -30,10 +30,31 @@ install_eksctl() {
   sudo chmod +x /usr/local/bin/eksctl
 }
 
+create_awsconfig() {
+  if [ ! -d ~/.aws ]; then
+    mkdir ~/.aws
+  fi
+
+  if [[ $AWS_SSO_URL != "" ]]; then
+    cat <<- AWSFILE > ~/.aws/config
+    [default]
+    sso_start_url = ${AWS_SSO_URL}
+    sso_region = ${AWS_SSO_REGION}
+    sso_account_id = ${AWS_ACCOUNT_ID}
+    sso_role_name = ${AWS_ROLE_NAME}
+    region = eu-west-1
+    AWSFILE
+  fi
+}
+
 main() {
   setup
   echo "Install awscliv2"
   install_awscliv2
   echo "Install eksctl"
   install_eksctl
+  echo "Create aws config"
+  create_awsconfig
 }
+
+
