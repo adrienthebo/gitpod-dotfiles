@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+PROJECT_ROOT="$(dirname $(dirname "$0"))"
+
+
+for script in $PROJECT_ROOT/script.d/*.sh; do
+  $script
+done
