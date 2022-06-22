@@ -2,6 +2,7 @@
 #
 # Set up AWS resources.
 
+set -x
 
 
 
