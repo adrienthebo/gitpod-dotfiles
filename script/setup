@@ -10,6 +10,6 @@ for script in $PROJECT_ROOT/script.d/*.sh; do
   $script
 done
 
-for script in $PROJECT_ROOT/bash.d/*.sh; do
+for script in $PROJECT_ROOT/bashrc.d/*.sh; do
   cp $script ~/.bashrc.d/
-end
+done
