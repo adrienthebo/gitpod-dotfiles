@@ -4,8 +4,6 @@
 
 set -x
 
-
-
 cleanup() {
   if [[ $WORKDIR != "" ]]; then
     rm -rf "$WORKDIR"
@@ -44,7 +42,7 @@ create_awsconfig() {
     sso_account_id = ${AWS_ACCOUNT_ID}
     sso_role_name = ${AWS_ROLE_NAME}
     region = eu-west-1
-    AWSFILE
+AWSFILE
   fi
 }
 
