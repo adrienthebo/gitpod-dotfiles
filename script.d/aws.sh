@@ -17,20 +17,24 @@ setup() {
 }
 
 install_awscliv2() {
-  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-  unzip awscliv2.zip
-  sudo ./aws/install
+  if ! (command -v aws && [[ -d /usr/local/aws-cli/v2 ]]); then
+    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+    unzip awscliv2.zip
+    sudo ./aws/install
+  fi
 }
 
 install_eksctl() {
-  curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" \
-  | tar -xzf - -O \
-  | sudo tee /usr/local/bin/eksctl > /dev/null
-  sudo chmod +x /usr/local/bin/eksctl
+  if ! command -v ekscli; then
+    curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" \
+    | tar -xzf - -O \
+    | sudo tee /usr/local/bin/eksctl > /dev/null
+    sudo chmod +x /usr/local/bin/eksctl
+  fi
 }
 
 create_awsconfig() {
-  if [ ! -d ~/.aws ]; then
+  if [[ ! -d ~/.aws ]]; then
     mkdir ~/.aws
   fi
 
@@ -56,4 +60,4 @@ main() {
   create_awsconfig
 }
 
-
+main

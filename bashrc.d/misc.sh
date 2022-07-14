@@ -9,3 +9,5 @@ pathmunge() {
 }
 
 pathmunge "$HOME/.local/bin" after
+
+[[ -f $HOME/.asdf/asdf.sh ]] && source $HOME/.asdf/asdf.sh
