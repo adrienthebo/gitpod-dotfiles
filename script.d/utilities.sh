@@ -1,26 +1,33 @@
 #!/usr/bin/env bash
 
-if ! [[ -d $HOME/.local/bin ]]; then
-    mkdir "$HOME/.local/bin"
-fi
+install_jiq() {
+    curl -L https://github.com/fiatjaf/jiq/releases/download/v0.7.2/jiq_linux_amd64 -o "$HOME/.local/bin/jiq"
+    chmod +x "$HOME/.local/bin/jiq"
+}
 
-curl -L https://github.com/fiatjaf/jiq/releases/download/v0.7.2/jiq_linux_amd64 -o "$HOME/.local/bin/jiq"
-chmod +x "$HOME/.local/bin/jiq"
 
 install_asdf() {
     if ! [[ -d ~/.asdf ]]; then
         git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.10.2
         source ~/.asdf/asdf.sh
     fi
+}
 
-    if ! [[ -d ~/.asdf/plugins/kubectl ]]; then
-        asdf plugin-add kubectl https://github.com/asdf-community/asdf-kubectl.git
+
+install_asdf_plugin() {
+    local plugin
+    plugin="$1"
+    version="$2"
+
+    if ! [[ -d "$HOME/.asdf/plugins/$plugin" ]]; then
+        asdf plugin add "$plugin"
     fi
 
-    if ! [[ -d ~/.asdf/plugins/cmctl ]]; then
-        asdf plugin-add cmctl https://github.com/asdf-community/asdf-cmctl.git
+    if ! [[ -z "$version" ]]; then
+        asdf install "$plugin" "$version"
     fi
 }
+
 
 install_krew() {
     if ! [[ -d ~/.krew ]]; then
@@ -33,7 +40,7 @@ install_krew() {
           tar zxvf "${KREW}.tar.gz" &&
           ./"${KREW}" install krew
         )
-        
+
         ~/.krew/bin/kubectl-krew install ns
         ~/.krew/bin/kubectl-krew install ctx
         ~/.krew/bin/kubectl-krew install neat
@@ -42,5 +49,14 @@ install_krew() {
     fi
 }
 
+if ! [[ -d $HOME/.local/bin ]]; then
+    mkdir "$HOME/.local/bin"
+fi
+
 install_asdf
 install_krew
+
+install_asdf_plugin cmctl
+install_asdf_plugin kubectl
+install_asdf_plugin yq latest
+install_asdf_plugin bat latest
