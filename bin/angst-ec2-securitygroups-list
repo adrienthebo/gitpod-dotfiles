@@ -1,0 +1,11 @@
+#!/bin/bash
+
+vpc_id="$(aws ec2 describe-vpcs \
+            --filters 'Name=tag:owner,Values=alt' \
+            --query 'Vpcs[*].[VpcId, CidrBlock]' \
+            | jq -r '.[0][0]')"
+
+aws ec2 describe-security-groups \
+    --filters "Name=vpc-id,Values=$vpc_id" \
+    | jq '[.SecurityGroups[] | {GroupId,GroupName,Description,VpcId}]' \
+    | jtbl

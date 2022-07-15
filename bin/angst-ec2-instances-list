@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+aws ec2 describe-instances \
+  | jq '[.Reservations | .[] | .Instances | .[] | {InstanceId: .InstanceId, SubnetId: .SubnetId, VpcId: .VpcId, Name: (.Tags[]|select(.Key=="Name")|.Value), State: .State.Name}]' \
+  | jtbl
