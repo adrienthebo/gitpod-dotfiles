@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [[ -n "$DEBUG" ]]; then
+    DEBUG_TAP="/dev/pts/2"
+else
+    DEBUG_TAP="/dev/null"
+fi
+
 vpc_id="$(aws ec2 describe-vpcs \
             --filters 'Name=tag:owner,Values=alt' \
             --query 'Vpcs[*].[VpcId, CidrBlock]' \
@@ -7,5 +13,6 @@ vpc_id="$(aws ec2 describe-vpcs \
 
 aws ec2 describe-security-groups \
     --filters "Name=vpc-id,Values=$vpc_id" \
+    | tee $DEBUG_TAP \
     | jq '[.SecurityGroups[] | {GroupId,GroupName,Description,VpcId}]' \
     | jtbl

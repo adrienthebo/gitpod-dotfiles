@@ -1,0 +1,29 @@
+#!/bin/bash
+
+filters="Name=tag:project,Values=gitpod"
+
+echo "Filters: $filters"
+
+#aws ec2 describe-subnets \
+#    --filters "Name=tag:project,Values=gitpod" \
+#    --query 'Subnets[?MapPublicIpOnLaunch==`true`] | [*].[SubnetId, AvailabilityZone, CidrBlock, MapPublicIpOnLaunch]'
+
+aws ec2 describe-subnets \
+    --filters "Name=tag:project,Values=gitpod" \
+    | jq \
+    '[
+        .Subnets[]
+        | select(.MapPublicIpOnLaunch == true)
+        | {
+            AvailabilityZone: .AvailabilityZone,
+            CidrBlock: .CidrBlock,
+            State: .State,
+            VpcId: .VpcId,
+            Tags: (
+                .Tags
+                | map({(.Key): (.Value)})
+                | add
+            )
+        }
+     ]' \
+     | jtbl

@@ -1,5 +1,16 @@
 #!/usr/bin/env bash
 
 aws ec2 describe-instances \
-  | jq '[.Reservations | .[] | .Instances | .[] | {InstanceId: .InstanceId, SubnetId: .SubnetId, VpcId: .VpcId, Name: (.Tags[]|select(.Key=="Name")|.Value), State: .State.Name}]' \
+  | tee >(cat 1>&2) \
+  | jq \
+    '[
+      .Reservations[].Instances[]
+      | {
+          Name: (.Tags[]|select(.Key=="Name")|.Value), State: .State.Name,
+          InstanceId: .InstanceId,
+          SubnetId: .SubnetId,
+          PrivateIpAddress: .PrivateIpAddress,
+          VpcId: .VpcId
+        }
+      ]' \
   | jtbl
