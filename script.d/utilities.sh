@@ -11,8 +11,6 @@ install_http_binary() {
     fi
 }
 
-install_http_binary tldr "https://github.com/dbrgn/tealdeer/releases/download/v1.5.0/tealdeer-linux-x86_64-musl"
-
 install_jiq() {
     curl -L https://github.com/fiatjaf/jiq/releases/download/v0.7.2/jiq_linux_amd64 -o "$HOME/.local/bin/jiq"
     chmod +x "$HOME/.local/bin/jiq"
@@ -38,6 +36,7 @@ install_asdf_plugin() {
 
     if ! [[ -z "$version" ]]; then
         asdf install "$plugin" "$version"
+        asdf global "$plugin" "$version"
     fi
 }
 
@@ -62,14 +61,23 @@ install_krew() {
     fi
 }
 
-if ! [[ -d $HOME/.local/bin ]]; then
-    mkdir "$HOME/.local/bin"
+main() {
+    if ! [[ -d $HOME/.local/bin ]]; then
+        mkdir "$HOME/.local/bin"
+    fi
+
+    install_asdf
+    install_krew
+
+    install_asdf_plugin cmctl
+    install_asdf_plugin kubectl
+    install_asdf_plugin yq latest
+    install_asdf_plugin bat latest
+
+    install_http_binary tldr "https://github.com/dbrgn/tealdeer/releases/download/v1.5.0/tealdeer-linux-x86_64-musl"
+    tldr --update
+}
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
 fi
-
-install_asdf
-install_krew
-
-install_asdf_plugin cmctl
-install_asdf_plugin kubectl
-install_asdf_plugin yq latest
-install_asdf_plugin bat latest
