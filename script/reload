@@ -1,0 +1,9 @@
+#!/usr/bin/env
+
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    echo "This is meant to be sourced, run 'source ${BASH_SOURCE[0]}'"
+fi
+
+"$(realpath $(dirname "${BASH_SOURCE[0]}"))/setup"
+source ~/.bashrc
