@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 
-set -x
-
 PROJECT_ROOT="$(dirname $(dirname "$0"))"
 
 echo "Project root: $PROJECT_ROOT"
 
 for script in $PROJECT_ROOT/script.d/*.sh; do
+  echo "Running setup script $script"
   $script
 done
 
 for script in $PROJECT_ROOT/bashrc.d/*.sh; do
+  echo "Copying bashrc $script to $HOME/.bashrc.d/"
   cp $script ~/.bashrc.d/
 done
 

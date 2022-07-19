@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+
+source "$(realpath $(dirname $0))/00_core.sh"
+
+
 install_http_binary() {
     binary="$1"
     url="$2"
@@ -16,61 +20,8 @@ install_jiq() {
     chmod +x "$HOME/.local/bin/jiq"
 }
 
-
-install_asdf() {
-    if ! [[ -d ~/.asdf ]]; then
-        git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.10.2
-        source ~/.asdf/asdf.sh
-    fi
-}
-
-
-install_asdf_plugin() {
-    local plugin
-    plugin="$1"
-    version="$2"
-
-    if ! [[ -d "$HOME/.asdf/plugins/$plugin" ]]; then
-        asdf plugin add "$plugin"
-    fi
-
-    if ! [[ -z "$version" ]]; then
-        asdf install "$plugin" "$version"
-        asdf global "$plugin" "$version"
-    fi
-}
-
-
-install_krew() {
-    if ! [[ -d ~/.krew ]]; then
-        (
-          set -x; cd "$(mktemp -d)" &&
-          OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
-          ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
-          KREW="krew-${OS}_${ARCH}" &&
-          curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
-          tar zxvf "${KREW}.tar.gz" &&
-          ./"${KREW}" install krew
-        )
-
-        ~/.krew/bin/kubectl-krew install ns
-        ~/.krew/bin/kubectl-krew install ctx
-        ~/.krew/bin/kubectl-krew install neat
-        ~/.krew/bin/kubectl-krew install whoami
-        ~/.krew/bin/kubectl-krew install viewnode
-    fi
-}
-
 main() {
-    if ! [[ -d $HOME/.local/bin ]]; then
-        mkdir "$HOME/.local/bin"
-    fi
 
-    install_asdf
-    install_krew
-
-    install_asdf_plugin cmctl
-    install_asdf_plugin kubectl
     install_asdf_plugin yq latest
     install_asdf_plugin bat latest
 
@@ -78,6 +29,7 @@ main() {
 
     $HOME/.local/bin/tldr --update
 }
+
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     main "$@"

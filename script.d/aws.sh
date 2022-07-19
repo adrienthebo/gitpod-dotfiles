@@ -2,7 +2,6 @@
 #
 # Set up AWS resources.
 
-set -x
 
 cleanup() {
   if [[ $WORKDIR != "" ]]; then
@@ -69,4 +68,7 @@ main() {
   install_angst_deps
 }
 
-main
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi
