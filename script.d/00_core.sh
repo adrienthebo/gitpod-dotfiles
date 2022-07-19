@@ -13,7 +13,7 @@ install_asdf_plugin() {
     local plugin version
     plugin="$1"
     version="$2"
-    
+
     if command -v $plugin 1>/dev/null && ! command -v $plugin | grep -q ".asdf/shims"; then
         echo "install-asdf-plugin: $plugin already exists at $(command -v $plugin), the asdf installed binary may be shadowed."
     fi
@@ -33,6 +33,8 @@ main() {
     if ! [[ -d $HOME/.local/bin ]]; then
         mkdir "$HOME/.local/bin"
     fi
+
+    eval "$(gp env -e)"
 
     install_asdf
 }

@@ -29,8 +29,9 @@ main() {
     install_krew
 
     install_asdf_plugin cmctl
-    install_asdf_plugin kubectl
-    
+    # KUBECTL_VERSION will be supplied by `gp env`
+    install_asdf_plugin kubectl "$KUBECTL_VERSION"
+
     if ! command -v kubectl-kots 1>/dev/null; then
         curl https://kots.io/install | bash
     fi
