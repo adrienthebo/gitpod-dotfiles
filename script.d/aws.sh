@@ -25,11 +25,18 @@ install_awscliv2() {
 }
 
 install_eksctl() {
-  if ! command -v ekscli; then
+  if ! command -v eksctl; then
     curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" \
     | tar -xzf - -O \
     | sudo tee /usr/local/bin/eksctl > /dev/null
     sudo chmod +x /usr/local/bin/eksctl
+  fi
+}
+
+# Associated commands for the aws angst command wrappers
+install_angst_deps() {
+  if command -v pip3 && ! (pip3 freeze | grep -q jtbl); then
+    pip3 install jtbl
   fi
 }
 
@@ -58,6 +65,8 @@ main() {
   install_eksctl
   echo "Create aws config"
   create_awsconfig
+  
+  install_angst_deps
 }
 
 main
