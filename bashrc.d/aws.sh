@@ -10,3 +10,7 @@ init_aws() {
         aws eks update-kubeconfig --name "$EKS_CLUSTER"
     fi
 }
+
+if command -v aws_completer 1>/dev/null; then
+    complete -C '/usr/local/bin/aws_completer' aws
+fi
