@@ -16,12 +16,16 @@ install_krew() {
           ./"${KREW}" install krew
         )
 
-        ~/.krew/bin/kubectl-krew install ns
-        ~/.krew/bin/kubectl-krew install ctx
-        ~/.krew/bin/kubectl-krew install neat
-        ~/.krew/bin/kubectl-krew install whoami
-        ~/.krew/bin/kubectl-krew install viewnode
     fi
+
+    ~/.krew/bin/kubectl-krew install ns
+    ~/.krew/bin/kubectl-krew install ctx
+    ~/.krew/bin/kubectl-krew install neat
+    ~/.krew/bin/kubectl-krew install whoami
+    ~/.krew/bin/kubectl-krew install viewnode
+    ~/.krew/bin/kubectl-krew install service-tree
+    ~/.krew/bin/kubectl-krew install sick-pods
+    ~/.krew/bin/kubectl-krew install evict-pod
 }
 
 
