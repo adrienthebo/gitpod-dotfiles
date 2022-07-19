@@ -26,6 +26,7 @@ install_krew() {
     ~/.krew/bin/kubectl-krew install service-tree
     ~/.krew/bin/kubectl-krew install sick-pods
     ~/.krew/bin/kubectl-krew install evict-pod
+    ~/.krew/bin/kubectl-krew install resource-capacity
 }
 
 
