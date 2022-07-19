@@ -3,9 +3,9 @@
 install_http_binary() {
     binary="$1"
     url="$2"
-    
+
     local output_path="$HOME/.local/bin/$binary"
-    
+
     if ! [[ -f "$output_path" ]]; then
         curl -L "$url" > "$output_path" && chmod +x "$output_path"
     fi
@@ -75,7 +75,8 @@ main() {
     install_asdf_plugin bat latest
 
     install_http_binary tldr "https://github.com/dbrgn/tealdeer/releases/download/v1.5.0/tealdeer-linux-x86_64-musl"
-    tldr --update
+
+    $HOME/.local/bin/tldr --update
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
