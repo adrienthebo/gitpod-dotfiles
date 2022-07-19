@@ -13,3 +13,8 @@ done
 for script in $PROJECT_ROOT/bashrc.d/*.sh; do
   cp $script ~/.bashrc.d/
 done
+
+[[ -d "$HOME/.local/bin" ]] || mkdir -p "$HOME/.local/bin"
+for executable in $PROJECT_ROOT/bin/*; do
+  cp $executable "$HOME/.local/bin/"
+done
