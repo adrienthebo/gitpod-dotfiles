@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Initialize AWS and eks configs.
+#
+# Environment_variables:
+#   - EKS_CLUSTER
+#
 init_aws() {
     
     eval "$(gp env -e)"
