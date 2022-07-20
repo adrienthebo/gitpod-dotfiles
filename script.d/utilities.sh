@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+#
+# Install common developer tools.
 
 
 source "$(realpath $(dirname $0))/00_core.sh"
@@ -24,6 +26,7 @@ main() {
 
     install_asdf_plugin yq latest
     install_asdf_plugin bat latest
+    install_asdf_plugin fzf latest
 
     install_http_binary tldr "https://github.com/dbrgn/tealdeer/releases/download/v1.5.0/tealdeer-linux-x86_64-musl"
 
