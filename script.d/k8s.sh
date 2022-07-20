@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 
+source "$HOME/.dotfiles/lib/functions.sh"
 source "$(realpath $(dirname $0))/00_core.sh"
 
 
@@ -17,21 +18,34 @@ install_krew() {
         )
 
     fi
+}
 
-    ~/.krew/bin/kubectl-krew install ns
-    ~/.krew/bin/kubectl-krew install ctx
-    ~/.krew/bin/kubectl-krew install neat
-    ~/.krew/bin/kubectl-krew install whoami
-    ~/.krew/bin/kubectl-krew install viewnode
-    ~/.krew/bin/kubectl-krew install service-tree
-    ~/.krew/bin/kubectl-krew install sick-pods
-    ~/.krew/bin/kubectl-krew install evict-pod
-    ~/.krew/bin/kubectl-krew install resource-capacity
+
+install_krew_plugin() {
+    local plugin
+    plugin=$1
+
+    if ! kubectl-krew list | grep -q "$plugin"; then
+        kubectl-krew install
+    fi
 }
 
 
 main() {
     install_krew
+    pathmunge "$HOME/.krew/bin" after
+
+
+    install_krew_plugin ns
+    install_krew_plugin ns
+    install_krew_plugin ctx
+    install_krew_plugin neat
+    install_krew_plugin whoami
+    install_krew_plugin viewnode
+    install_krew_plugin service-tree
+    install_krew_plugin sick-pods
+    install_krew_plugin evict-pod
+    install_krew_plugin resource-capacity
 
     install_asdf_plugin cmctl
     # KUBECTL_VERSION will be supplied by `gp env`
