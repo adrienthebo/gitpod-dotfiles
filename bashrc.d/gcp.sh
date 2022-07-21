@@ -5,7 +5,7 @@ init_gcloud() {
 
     eval "$(gp env -e)"
     local gcp_vars
-    gcp_vars=(GCLOUD_ACCOUNT GCLOUD_PROJECT GCLOUD_COMPUTE_REGION GCLOUD_COMPUTE_ZONE)
+    gcp_vars=(GCLOUD_ACCOUNT GCLOUD_PROJECT GCLOUD_COMPUTE_REGION GCLOUD_COMPUTE_ZONE GKE_CLUSTER)
 
     for evar in "${gcp_vars[@]}"; do
         echo "${evar}=${!evar}"
@@ -53,5 +53,14 @@ init_gcloud() {
 
     if ! gcloud auth list --format=json | grep -q ACTIVE; then
         gcloud auth login
+    fi
+
+    if [[ -n "$GKE_CLUSTER" ]]; then
+        if ! command -v gke-gcloud-auth-plugin 1>/dev/null 2>/dev/null; then
+            gcloud components install gke-gcloud-auth-plugin --quiet
+            asdf reshim gcloud
+        fi
+
+        gcloud container clusters get-credentials "${GKE_CLUSTER}"
     fi
 }
