@@ -11,7 +11,7 @@ init_gcloud() {
         echo "${evar}=${!evar}"
     done
 
-    if ! command -v gcloud; then
+    if ! command -v gcloud 1>/dev/null 2>/dev/null; then
         if ! [[ -d "$HOME/.asdf/plugins/gcloud" ]]; then
             asdf plugin add gcloud
         fi
