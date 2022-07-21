@@ -6,8 +6,15 @@
 #   - EKS_CLUSTER
 #
 init_aws() {
-    
+    echo -e "Initializing AWS\n"
+
     eval "$(gp env -e)"
+
+    aws_vars=(EKS_CLUSTER)
+
+    for evar in "${aws_vars[@]}"; do
+        echo "${evar}=${!evar}"
+    done
     
     aws sso login
     
