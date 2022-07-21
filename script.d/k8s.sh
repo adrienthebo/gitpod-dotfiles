@@ -26,7 +26,7 @@ install_krew_plugin() {
     plugin=$1
 
     if ! kubectl-krew list | grep -q "$plugin"; then
-        kubectl-krew install
+        kubectl-krew install "$plugin"
     fi
 }
 
