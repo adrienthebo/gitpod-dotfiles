@@ -1,7 +1,15 @@
 #!/bin/bash
 
 init_gcloud() {
+    echo -e "Initializing GCP and gcloud\n"
+
     eval "$(gp env -e)"
+    local gcp_vars
+    gcp_vars=(GCLOUD_ACCOUNT GCLOUD_PROJECT GCLOUD_COMPUTE_REGION GCLOUD_COMPUTE_ZONE)
+
+    for evar in "${gcp_vars[@]}"; do
+        echo "${evar}=${!evar}"
+    done
 
     if ! command -v gcloud; then
         if ! [[ -d "$HOME/.asdf/plugins/gcloud" ]]; then
@@ -18,10 +26,14 @@ init_gcloud() {
         gcloud config configurations activate gitpod
     else
         gcloud config configurations create gitpod
-    fi
     # Or activate
+    fi
 
-    gcloud auth login
+    if gcloud auth print-access-token 1>/dev/null 2>/dev/null; then
+        echo "GCP credentials already present (account: "$(gcloud auth list --format='get(account)')")"
+    else
+        gcloud auth login --update-adc
+    fi
 
     if [[ -n "$GCLOUD_ACCOUNT" ]]; then
         gcloud config set account "$(gp env | awk -F =  '/GCLOUD_ACCOUNT/ { print $2 }')"
