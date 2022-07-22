@@ -12,6 +12,29 @@ register_feature() {
     _features[$name]="$name $status_fn $init_fn $load_fn $autoload_fn"
 }
 
+require_feature() {
+    local key
+    key=$1
+
+    local _feature f_name status_fn init_fn load_fn autoload_fn
+    declare -a _feature
+    read -ra _feature <<< "${_features[$key]}"
+
+    f_name="${_feature[0]}"
+    status_fn=${_feature[1]}
+    load_fn=${_feature[3]}
+
+
+    $status_fn
+    statuscode=$?
+    "feature $key status: $status_fn -> $statuscode"
+
+    if [[ $statuscode -ne 0 ]]; then
+        init_feature "$key"
+    fi
+
+}
+
 announce_features() {
     echo "Available features"
     for key in "${!_features[@]}"; do
@@ -86,42 +109,6 @@ autoload_features() {
     done
 }
 
-_f_status_gcloud() {
-    echo "ready"
-    return 0
-}
-
-_f_init_gcloud() {
-    echo "feature/gcloud: initializing plugin"
-}
-
-_f_load_gcloud() {
-    echo "feature/gcloud: Loading"
-}
-
-_f_autoload_gcloud() {
-    if [[ -n $AUTOLOAD_GCLOUD ]]; then
-        echo "feature/gcloud: should autoload"
-        return 0
-    else
-        echo "feature/gcloud: should not autoload"
-        return 1
-    fi
-}
-
-_f_asdf_status() {
-    if ! [[ -d $HOME/.asdf ]]; then
-        echo "absent"
-        return 1
-    elif [[ -z $ASDF_DIR ]]; then
-        echo "inactive"
-        return 1
-    else
-        echo "ready"
-        return 0
-    fi
-}
-
 _f_asdf_init() {
     echo "initialing asdf"
 
@@ -144,5 +131,84 @@ _f_asdf_autoload() {
     fi
 }
 
-register_feature "gcloud" "_f_status_gcloud" "_f_init_gcloud" "_f_load_gcloud" "_f_autoload_gcloud"
+_f_asdf_status() {
+    echo "asdf status"
+    if ! [[ -d $HOME/.asdf ]]; then
+        echo "absent"
+        return 1
+    elif [[ -z $ASDF_DIR ]]; then
+        echo "inactive"
+        return 1
+    else
+        echo "ready"
+        return 0
+    fi
+}
+
 register_feature "asdf" "_f_asdf_status" "_f_asdf_init" "_f_asdf_load" "_f_asdf_autoload"
+
+_f_gcloud_status() {
+    if command -v gcloud 1>/dev/null; then
+        echo "ready"
+        return 0
+    else
+        echo "absent"
+        return 1
+    fi
+}
+
+_f_gcloud_init() {
+    echo "feature/gcloud: initializing plugin"
+}
+
+_f_gcloud_load() {
+    echo "feature/gcloud: Loading"
+}
+
+_f_gcloud_autoload() {
+    if [[ -n $AUTOLOAD_GCLOUD ]]; then
+        echo "feature/gcloud: should autoload"
+        return 0
+    else
+        echo "feature/gcloud: should not autoload"
+        return 1
+    fi
+}
+
+register_feature "gcloud" "_f_gcloud_status" "_f_gcloud_init" "_f_gcloud_load" "_f_gcloud_autoload"
+
+_f_kubectl_status() {
+    if command -v kubectl 1>/dev/null; then
+        echo "ready"
+        return 0
+    else
+        echo "absent"
+        return 1
+    fi
+}
+
+_f_kubectl_init() {
+    local _kubectl_version
+    _kubectl_version=${KUBECTL_VERSION:-latest}
+
+    echo "requiring feature"
+    require_feature asdf
+
+    asdf plugin add kubectl
+    asdf install kubectl "$_kubectl_version"
+    asdf global kubectl "$_kubectl_version"
+}
+
+_f_kubectl_load() {
+    asdf global kubectl "$_kubectl_version"
+}
+
+_f_kubectl_autoload() {
+    if [[ -n $KUBECTL_VERSION ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+register_feature "kubectl" "_f_kubectl_status" "_f_kubectl_init" "_f_kubectl_load" "_f_kubectl_autoload"
