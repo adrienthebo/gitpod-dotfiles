@@ -1,0 +1,150 @@
+#!/usr/bin/env bash
+
+FUNCTION_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")"
+source "$FUNCTION_DIR/functions.sh"
+
+__krew_init() {
+    cat - <<EOD
+if ! [[ $PATH =~ ".krew/bin" ]]; then
+    export PATH="$PATH:$HOME/.krew/bin"
+fi
+EOD
+}
+
+
+__krew_install() {
+
+    cd "$(mktemp -d)" &&
+    OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
+    ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
+    KREW="krew-${OS}_${ARCH}" &&
+    curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
+    tar zxvf "${KREW}.tar.gz" &&
+    ./"${KREW}" install krew
+    
+    __krew_install_plugin ns
+    __krew_install_plugin ns
+    __krew_install_plugin ctx
+    __krew_install_plugin neat
+    __krew_install_plugin whoami
+    __krew_install_plugin viewnode
+    __krew_install_plugin service-tree
+    __krew_install_plugin sick-pods
+    __krew_install_plugin evict-pod
+    __krew_install_plugin resource-capacity
+}
+
+
+__krew_install_plugin() {
+    local plugin
+    plugin=$1
+
+    if ! kubectl-krew list | grep -q "$plugin"; then
+        kubectl-krew install "$plugin"
+    fi
+}
+
+
+__krew_is_active() {
+    [[ $PATH =~ "$HOME/.krew" ]]
+    return $?
+}
+
+
+__krew_is_installed() {
+    [[ -d "$HOME/.krew" ]]
+    return $?
+}
+
+
+__krew_is_ready() {
+    if __krew_is_installed && ! __krew_is_active; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+
+__krew_autoload() {
+    if ! __krew_is_installed ; then
+        __krew_install
+        rc=$?
+        if [[ $rc -ne 0 ]]; then
+            return $rc
+        fi
+    fi
+
+    if ! __krew_is_active ; then
+        echo "not active"
+        eval "$(__krew_init | tee >(cat - >&2))"
+        echo "fooo"
+        grep krew <<< $PATH
+        if [[ $? -eq 0 ]]; then
+        echo yep
+        else 
+        echo nope
+        fi
+    fi
+}
+
+__krew_autorun() {
+    ARGV="$@"
+
+    grep krew <<< $PATH
+    if [[ $? -eq 0 ]]; then
+    echo yep
+    else 
+    echo nope
+    fi
+    
+    __krew_autoload || return 254
+
+    $ARGV
+    return $?
+}
+
+main() {
+    ARG="$1"
+    shift
+    case "$ARG" in
+        "init")
+            __krew_init
+            ;;
+
+        "install")
+            __krew_install
+            ;;
+            
+        "is-active")
+            __krew_is_active
+            ;;
+            
+        "is-installed")
+            __krew_is_installed
+            ;;
+            
+        "is-ready")
+            __krew_is_ready
+            ;;
+
+        "autoload")
+            __krew_autoload
+            ;;
+
+        "autorun")
+            __krew_autorun "$@"
+            exit $?
+            ;;
+        *)
+            echo "Usage: $0 [init|install|is-active|is-installed]"
+            ;;
+    esac
+        
+}
+
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    # shellcheck disable=SC2068
+    main $@
+fi

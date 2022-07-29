@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+
+
+__asdf_init() {
+    echo -e "source \"$HOME/.asdf/asdf.sh\""
+}
+
+
+__asdf_install() {
+    if ! [[ -d $HOME/.asdf ]]; then
+        git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.10.2 || return 1
+
+        source "$HOME/.asdf/asdf.sh"
+    fi
+}
+
+
+__asdf_is_active() {
+    [[ -n $ASDF_DIR ]]
+    return $?
+}
+
+
+__asdf_is_installed() {
+    [[ -d "$HOME/.asdf" ]]
+    return $?
+}
+
+
+__asdf_is_ready() {
+    if __asdf_is_installed && ! __asdf_is_active; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+
+__asdf_autoload() {
+    if ! __asdf_is_installed ; then
+        __asdf_install
+        rc=$?
+        if [[ $rc -ne 0 ]]; then
+            return $rc
+        fi
+    fi
+
+    if ! __asdf_is_active ; then
+        eval "$(__asdf_init)"
+    fi
+}
+
+__asdf_autorun() {
+    ARGV="$@"
+    
+    __asdf_autoload || return 254
+
+    $ARGV
+    return $?
+}
+
+main() {
+    ARG="$1"
+    shift
+    case "$ARG" in
+        "init")
+            __asdf_init
+            ;;
+
+        "install")
+            __asdf_install
+            ;;
+            
+        "is-active")
+            __asdf_is_active
+            ;;
+            
+        "is-installed")
+            __asdf_is_installed
+            ;;
+            
+        "is-ready")
+            __asdf_is_ready
+            ;;
+
+        "autoload")
+            __asdf_autoload
+            ;;
+
+        "autorun")
+            __asdf_autorun "$@"
+            exit $?
+            ;;
+        *)
+            echo "Usage: $0 [init|install|is-active|is-installed]"
+            ;;
+    esac
+        
+}
+
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    # shellcheck disable=SC2068
+    main $@
+fi
