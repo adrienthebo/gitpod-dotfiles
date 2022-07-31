@@ -87,7 +87,7 @@ __autoinit_init() {
     __autoinit_alias_fn "__autoinit_handle" "command_not_found_handle"
     
     __autoinit_register "asdf"
-    __autoinit_register "krew"
+    __autoinit_register "kubectl-krew"
 }
 
 __autoinit_unload() {
@@ -112,6 +112,7 @@ autoinit() {
     
     case "$cmd" in
         init)
+            __autoinit_clear
             __autoinit_init \
                 && __autoinit_autoload \
                 && __autoinit_status
