@@ -121,7 +121,7 @@ autoinit() {
             __autoinit_unload
             ;;
         autoload) __autoinit_autoload ;;
-        status) __autoinit_status     ;;
+        status|list) __autoinit_status     ;;
         help|*) echo "usage: autoinit [init|autoload|unload|status|help]"
     esac
 }

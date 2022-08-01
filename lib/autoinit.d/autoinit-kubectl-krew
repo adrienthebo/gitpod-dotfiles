@@ -21,7 +21,9 @@ __krew_install() {
     curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
     tar zxvf "${KREW}.tar.gz" &&
     ./"${KREW}" install krew
-    
+
+    eval "$(__krew_init)"
+
     __krew_install_plugin ns
     __krew_install_plugin ns
     __krew_install_plugin ctx
@@ -76,28 +78,13 @@ __krew_autoload() {
     fi
 
     if ! __krew_is_active ; then
-        echo "not active"
-        eval "$(__krew_init | tee >(cat - >&2))"
-        echo "fooo"
-        grep krew <<< $PATH
-        if [[ $? -eq 0 ]]; then
-        echo yep
-        else 
-        echo nope
-        fi
+        eval "$(__krew_init)"
     fi
 }
 
 __krew_autorun() {
     ARGV="$@"
 
-    grep krew <<< $PATH
-    if [[ $? -eq 0 ]]; then
-    echo yep
-    else 
-    echo nope
-    fi
-    
     __krew_autoload || return 254
 
     $ARGV
@@ -115,15 +102,15 @@ main() {
         "install")
             __krew_install
             ;;
-            
+
         "is-active")
             __krew_is_active
             ;;
-            
+
         "is-installed")
             __krew_is_installed
             ;;
-            
+
         "is-ready")
             __krew_is_ready
             ;;
@@ -140,7 +127,7 @@ main() {
             echo "Usage: $0 [init|install|is-active|is-installed]"
             ;;
     esac
-        
+
 }
 
 
