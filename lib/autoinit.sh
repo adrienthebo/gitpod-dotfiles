@@ -22,8 +22,13 @@ __autoinit_handle() {
         "$AUTOINIT_DIR/autoinit-$CMD" autorun $@
     else
         echo "$(basename $SHELL): $CMD: command not found"
+        return 127
     fi
-    return 127
+}
+
+__autoinit_install() {
+    local CMD="$1"
+    "$AUTOINIT_DIR/autoinit-$CMD" install
 }
 
 __autoinit_alias_fn() {
@@ -109,6 +114,8 @@ __autoinit_run() {
 
 autoinit() {
     local cmd=$1
+    shift
+    local args="$@"
     
     case "$cmd" in
         init)
@@ -117,12 +124,13 @@ autoinit() {
                 && __autoinit_autoload \
                 && __autoinit_status
             ;;
+        autoload) __autoinit_autoload    ;;
+        install) __autoinit_install "${args[0]}" ;;
+        status|list) __autoinit_status   ;;
         unload)
             __autoinit_unload
             ;;
-        autoload) __autoinit_autoload ;;
-        status|list) __autoinit_status     ;;
-        help|*) echo "usage: autoinit [init|autoload|unload|status|help]"
+        help|*) echo "usage: autoinit [init|install|autoload|unload|status|help]"
     esac
 }
 
