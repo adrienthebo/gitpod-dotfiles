@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+
+ssh_to_node() {
+    POD_ID="$1"
+
+    set -x
+
+    DOC="$(kubectl get pod "$POD_ID" -ojson)" \
+
+    NODE_NAME="$(jq -r .spec.nodeName <<< $DOC)"
+    CONTAINER_ID="$(jq -r '..|.containerID?|select(.)|split("/")[-1]' <<< $DOC)"
+
+    ZONE="$(gcloud compute instances list --format='value(zone.scope())' --filter="name: $NODE_NAME")"
+
+    if [[ $? -ne 0 ]]; then
+        echo "Gcloud compute instances failed, cannot continue"
+        return
+    fi
+
+    gcloud compute ssh "$NODE_NAME" --zone "$ZONE" --ssh-flag="-p 2222" \
+        -- "sudo nerdctl inspect --namespace k8s.io $CONTAINER_ID"
+
+    gcloud compute ssh "$NODE_NAME" --zone "$ZONE" --ssh-flag="-p 2222"
+}
+
+main() {
+    WORKSPACE_POD="$1"
+    WORKSPACE_ID="$(echo "$WORKSPACE_POD" | sed -e 's/^ws-//' | sed -e 's/^prebuild-//')"
+
+    gpctl workspaces describe "$WORKSPACE_ID"
+    EXITCODE=$?
+
+    if [[ $EXITCODE -eq 0 ]]; then
+        DOC="$(gpctl workspaces describe "$WORKSPACE_ID" -ojson)"
+    else
+        echo "Cannot find workspace $WORKSPACE_ID. Perhaps this workspace is found in a different castle?"
+        return
+    fi
+
+    #gpctl workspaces describe "$WORKSPACE_ID" -ojson
+
+    if [[ -n $OPEN_WORKSPACE ]]; then
+        META_ID="$(jq -r '.metadata.meta_id' <<< $DOC)"
+        echo "Opening https://gitpod.io/admin/workspaces/$META_ID"
+        ( /ide/bin/helpers/browser.sh "https://gitpod.io/admin/workspaces/$META_ID" ) &
+    fi
+
+    if [[ -n $OPEN_USER ]]; then
+        OWNER_ID="$(jq -r '.metadata.owner' <<< $DOC)"
+        echo "Opening https://gitpod.io/admin/users/$OWNER_ID"
+        ( /ide/bin/helpers/browser.sh "https://gitpod.io/admin/users/$OWNER_ID" ) &
+    fi
+    # We'll wind up waiting for forked shells since we've backgrounded them but not disowned them
+
+    if [[ -n $SSH_TO_NODE ]]; then
+        ssh_to_node "$WORKSPACE_POD"
+    fi
+}
+
+
+if [[ "${BASH_SOURCE[0]}" = "$0" ]]; then
+
+    echo "Parsing opts: $@"
+    while getopts ":uwsh" opt; do
+        case $opt in
+            "u")
+                OPEN_USER=true
+                ;;
+            "w")
+                OPEN_WORKSPACE=true
+                ;;
+            "s")
+                SSH_TO_NODE=true
+                ;;
+            "h")
+                echo "Usage: $0 [-w] [-u] <pod-id>"
+                exit
+                ;;
+            :)
+                echo "$0: Must supply an argument to -$OPTARG." >&2
+                exit 1
+                ;;
+            ?)
+                echo "Invalid option: -${OPTARG}."
+                exit 2
+                ;;
+            *)
+                echo "Unhandled option: \"${opt}\""
+                ;;
+        esac
+    done
+    shift $((OPTIND-1))
+    main $@
+fi
