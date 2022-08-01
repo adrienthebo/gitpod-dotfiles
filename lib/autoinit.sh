@@ -16,14 +16,17 @@ __autoinit_handle() {
     local CMD="$1"
     
     # shellcheck disable=2199
-    if [[ ${__autoinit_plugins[@]} =~ $CMD ]]; then
-        # shellcheck disable=2068
-        echo "$AUTOINIT_DIR/autoinit-$CMD" autorun $@
-        "$AUTOINIT_DIR/autoinit-$CMD" autorun $@
-    else
-        echo "$(basename $SHELL): $CMD: command not found"
-        return 127
-    fi
+    local plugin
+    for plugin in "${__autoinit_plugins[@]}"; do
+        if [[ "${plugin}" = $CMD ]]; then
+            # shellcheck disable=2068
+            echo "$AUTOINIT_DIR/autoinit-$CMD" autorun $@
+            "$AUTOINIT_DIR/autoinit-$CMD" autorun $@
+            return $?
+        fi
+    done
+    echo "$(basename $SHELL): $CMD: command not found"
+    return 127
 }
 
 __autoinit_install() {
