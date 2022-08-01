@@ -24,16 +24,16 @@ __krew_install() {
 
     eval "$(__krew_init)"
 
-    __krew_install_plugin ns
-    __krew_install_plugin ns
     __krew_install_plugin ctx
+    __krew_install_plugin evict-pod
     __krew_install_plugin neat
-    __krew_install_plugin whoami
-    __krew_install_plugin viewnode
+    __krew_install_plugin ns
+    __krew_install_plugin resource-capacity
     __krew_install_plugin service-tree
     __krew_install_plugin sick-pods
-    __krew_install_plugin evict-pod
-    __krew_install_plugin resource-capacity
+    __krew_install_plugin stern
+    __krew_install_plugin viewnode
+    __krew_install_plugin whoami
 }
 
 
