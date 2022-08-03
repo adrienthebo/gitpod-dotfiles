@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+
+FUNCTION_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")"
+source "$FUNCTION_DIR/functions.sh"
+
+__gcloud_init() {
+    cat - <<EOD
+EOD
+}
+
+
+__gcloud_install() {
+    asdf plugin add gcloud
+    asdf install gcloud latest
+    asdf global gcloud latest
+}
+
+
+__gcloud_is_active() {
+    [[ $(command -v gcloud) = "$ASDF_DIR/shims/gcloud" ]]
+    return $?
+}
+
+
+__gcloud_is_installed() {
+    asdf list gcloud 2>/dev/null 1>/dev/null
+    return $?
+}
+
+
+__gcloud_is_ready() {
+    if __gcloud_is_installed && ! __gcloud_is_active && ! command -v gcloud 1>/dev/null; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+
+__gcloud_autoload() {
+    if ! __gcloud_is_installed ; then
+        __gcloud_install
+        rc=$?
+        if [[ $rc -ne 0 ]]; then
+            return $rc
+        fi
+    fi
+
+    if ! __gcloud_is_active ; then
+        eval "$(__gcloud_init)"
+    fi
+}
+
+__gcloud_autorun() {
+    ARGV="$@"
+
+    __gcloud_autoload || return 254
+
+    $ARGV
+    return $?
+}
+
+main() {
+    ARG="$1"
+    shift
+    case "$ARG" in
+        "init")
+            __gcloud_init
+            ;;
+
+        "install")
+            __gcloud_install
+            ;;
+
+        "is-active")
+            __gcloud_is_active
+            ;;
+
+        "is-installed")
+            __gcloud_is_installed
+            ;;
+
+        "is-ready")
+            __gcloud_is_ready
+            ;;
+
+        "autoload")
+            __gcloud_autoload
+            ;;
+
+        "autorun")
+            __gcloud_autorun "$@"
+            exit $?
+            ;;
+        *)
+            echo "Usage: $0 [init|install|is-active|is-installed]"
+            ;;
+    esac
+
+}
+
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    # shellcheck disable=SC2068
+    main $@
+fi

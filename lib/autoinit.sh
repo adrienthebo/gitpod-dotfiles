@@ -96,6 +96,7 @@ __autoinit_init() {
     
     __autoinit_register "asdf"
     __autoinit_register "kubectl-krew"
+    __autoinit_register "gcloud"
 }
 
 __autoinit_unload() {
@@ -132,6 +133,13 @@ autoinit() {
         status|list) __autoinit_status   ;;
         unload)
             __autoinit_unload
+            ;;
+        reload)
+            __autoinit_clear
+            source "${BASH_SOURCE[0]}"
+            __autoinit_init \
+                && __autoinit_autoload \
+                && __autoinit_status
             ;;
         help|*) echo "usage: autoinit [init|install|autoload|unload|status|help]"
     esac
