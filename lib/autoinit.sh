@@ -30,8 +30,11 @@ __autoinit_handle() {
 }
 
 __autoinit_install() {
-    local CMD="$1"
-    "$AUTOINIT_DIR/autoinit-$CMD" install
+    local plugin plugins
+    plugins=($1)
+    for plugin in "${plugins[@]}"; do
+      "$AUTOINIT_DIR/autoinit-$plugin" install
+    done
 }
 
 __autoinit_alias_fn() {
@@ -134,7 +137,7 @@ autoinit() {
             ;;
 
         install)
-            __autoinit_install "${args[0]}"
+            __autoinit_install "${args[@]}"
             __autoinit_autoload
             ;;
 
