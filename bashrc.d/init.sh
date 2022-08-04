@@ -16,5 +16,5 @@ alias k="kubectl"
 alias tf="terraform"
 
 if command -v direnv 1>/dev/null; then
-    "$(direnv hook "$(basename "$SHELL")")"
+    eval "$(direnv hook "$(basename "$SHELL")")"
 fi
