@@ -14,7 +14,7 @@ __autoinit_debug() {
 __autoinit_handle() {
     local ARGV="$@"
     local CMD="$1"
-    
+
     # shellcheck disable=2199
     local plugin
     for plugin in "${__autoinit_plugins[@]}"; do
@@ -34,13 +34,16 @@ __autoinit_install() {
     plugins=($1)
     for plugin in "${plugins[@]}"; do
       "$AUTOINIT_DIR/autoinit-$plugin" install
+      __autoinit_autoload_plugin "$plugin"
     done
 }
+
 
 __autoinit_alias_fn() {
     declare -F $1 > /dev/null || return 1
     eval "$(echo "${2}()"; declare -f ${1} | tail -n +2)"
 }
+
 
 __autoinit_register() {
     local plugin="$1"
@@ -52,24 +55,31 @@ __autoinit_register() {
     __autoinit_debug "autoinit-register unloaded='${__autoinit_unloaded_plugins}'"
 }
 
+
 __autoinit_autoload() {
     local plugin
 
     __autoinit_debug "autoinit-autoload: unloaded=${__autoinit_unloaded_plugins[*]}"
 
     for plugin in ${__autoinit_unloaded_plugins[*]}; do
-        __autoinit_debug "autoinit-autoload: checking '$plugin'"
-
-        if "${AUTOINIT_DIR}/autoinit-$plugin" is-ready; then
-            __autoinit_debug "autoinit-autoload: initializing $plugin"
-
-            eval "$("${AUTOINIT_DIR}/autoinit-$plugin" init)"
-            
-            __autoinit_unloaded_plugins=("${__autoinit_unloaded_plugins[@]/$plugin}" )
-        else
-            __autoinit_debug "autoinit-autoload: $plugin already loaded"
-        fi
+        __autoinit_autoload_plugin "$plugin"
     done
+}
+
+
+__autoinit_autoload_plugin() {
+    local plugin="$1"
+    __autoinit_debug "autoinit-autoload: checking '$plugin'"
+
+    if "${AUTOINIT_DIR}/autoinit-$plugin" is-ready; then
+        __autoinit_debug "autoinit-autoload: initializing $plugin"
+
+        eval "$("${AUTOINIT_DIR}/autoinit-$plugin" init)"
+
+        __autoinit_unloaded_plugins=("${__autoinit_unloaded_plugins[@]/$plugin}" )
+    else
+        __autoinit_debug "autoinit-autoload: $plugin already loaded"
+    fi
 }
 
 __autoinit_status() {
@@ -96,7 +106,7 @@ __autoinit_init() {
     declare -ag __autoinit_unloaded_plugins
 
     __autoinit_alias_fn "__autoinit_handle" "command_not_found_handle"
-    
+
     __autoinit_register "asdf"
     __autoinit_register "kubectl-krew"
     __autoinit_register "gcloud"
@@ -123,7 +133,7 @@ autoinit() {
     local cmd=$1
     shift
     local args="$@"
-    
+
     case "$cmd" in
         init)
             __autoinit_clear
