@@ -64,3 +64,25 @@ init_gcloud() {
         gcloud container clusters get-credentials "${GKE_CLUSTER}"
     fi
 }
+
+# gp env GCP_CREDENTIALS="$(sqlite3 ~/.config/gcloud/credentials.db .dump | base64 --wrap=0)"
+if gp env |grep -q 'GCP_CREDENTIALS' && ! [[ -f ~/.config/gcloud/credentials.db ]]; then
+    echo "Restoring GCP credentials"
+    mkdir -p ~/.config/gcloud
+    gp env \
+        | sed -ne '/GCP_CREDENTIALS/s/^[^=]\+=\(.*\)$/\1/p' \
+        | base64 -d \
+        | sqlite3 ~/.config/gcloud/credentials.db
+fi
+
+sleep 1
+
+#  gp env GCP_ACCESS_TOKENS="$(sqlite3 ~/.config/gcloud/access_tokens.db .dump | base64 --wrap=0)"
+if gp env |grep -q 'GCP_ACCESS_TOKENS' && ! [[ -f ~/.config/gcloud/access_tokens.db ]]; then
+    mkdir -p ~/.config/gcloud
+    echo "Restoring GCP access tokens"
+    gp env \
+        | sed -ne '/GCP_ACCESS_TOKENS/s/^[^=]\+=\(.*\)$/\1/p' \
+        | base64 -d \
+        | sqlite3 ~/.config/gcloud/access_tokens.db
+fi
