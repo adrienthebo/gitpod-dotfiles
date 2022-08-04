@@ -128,12 +128,24 @@ autoinit() {
                 && __autoinit_autoload \
                 && __autoinit_status
             ;;
-        autoload) __autoinit_autoload    ;;
-        install) __autoinit_install "${args[0]}" ;;
-        status|list) __autoinit_status   ;;
+
+        autoload)
+            __autoinit_autoload
+            ;;
+
+        install)
+            __autoinit_install "${args[0]}"
+            __autoinit_autoload
+            ;;
+
+        status|list)
+            __autoinit_status
+            ;;
+
         unload)
             __autoinit_unload
             ;;
+
         reload)
             __autoinit_clear
             source "${BASH_SOURCE[0]}"
@@ -141,7 +153,10 @@ autoinit() {
                 && __autoinit_autoload \
                 && __autoinit_status
             ;;
-        help|*) echo "usage: autoinit [init|install|autoload|unload|status|help]"
+
+        help|*)
+            echo "usage: autoinit [init|install|autoload|unload|status|help]"
+            ;;
     esac
 }
 
