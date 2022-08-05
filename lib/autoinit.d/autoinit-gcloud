@@ -4,15 +4,24 @@ FUNCTION_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")"
 source "$FUNCTION_DIR/functions.sh"
 
 __gcloud_init() {
+    local latest="$(asdf list gcloud | tail -n1 | tr -d '[:space:]')"
     cat - <<EOD
+asdf reshim gcloud "$latest"
+source "$(gcloud info --format='get(config.paths.sdk_root)')/completion.$(basename "$SHELL").inc"
 EOD
 }
 
 
 __gcloud_install() {
     asdf plugin add gcloud
+
     asdf install gcloud latest
-    asdf global gcloud latest
+
+    asdf exec gcloud components install gke-gcloud-auth-plugin
+    local latest="$(asdf list gcloud | tail -n 1 | tr -d '[:space]')"
+
+    asdf global gcloud "$latest"
+    asdf reshim gcloud "$latest"
 }
 
 
