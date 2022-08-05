@@ -110,6 +110,16 @@ __autoinit_init() {
     __autoinit_register "asdf"
     __autoinit_register "kubectl-krew"
     __autoinit_register "gcloud"
+
+}
+
+
+__autoinit_init_plugin() {
+    local plugin plugins
+    plugins=($@)
+    for plugin in "${plugins[@]}"; do
+        eval "$("${AUTOINIT_DIR}/autoinit-$plugin" init)"
+    done
 }
 
 __autoinit_unload() {
@@ -140,6 +150,10 @@ autoinit() {
             __autoinit_init \
                 && __autoinit_autoload \
                 && __autoinit_status
+            ;;
+
+        init-plugin)
+            __autoinit_init_plugin "${args[@]}"
             ;;
 
         autoload)
