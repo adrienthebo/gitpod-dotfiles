@@ -66,7 +66,7 @@ init_gcloud() {
 }
 
 # gp env GCP_CREDENTIALS="$(sqlite3 ~/.config/gcloud/credentials.db .dump | base64 --wrap=0)"
-if gp env |grep -q 'GCP_CREDENTIALS' && ! [[ -f ~/.config/gcloud/credentials.db ]]; then
+if gp env | grep -q 'GCP_CREDENTIALS' && ! [[ -f ~/.config/gcloud/credentials.db ]]; then
     echo "Restoring GCP credentials"
     mkdir -p ~/.config/gcloud
     gp env \
@@ -78,7 +78,7 @@ fi
 sleep 1
 
 #  gp env GCP_ACCESS_TOKENS="$(sqlite3 ~/.config/gcloud/access_tokens.db .dump | base64 --wrap=0)"
-if gp env |grep -q 'GCP_ACCESS_TOKENS' && ! [[ -f ~/.config/gcloud/access_tokens.db ]]; then
+if gp env | grep -q 'GCP_ACCESS_TOKENS' && ! [[ -f ~/.config/gcloud/access_tokens.db ]]; then
     mkdir -p ~/.config/gcloud
     echo "Restoring GCP access tokens"
     gp env \
@@ -86,3 +86,11 @@ if gp env |grep -q 'GCP_ACCESS_TOKENS' && ! [[ -f ~/.config/gcloud/access_tokens
         | base64 -d \
         | sqlite3 ~/.config/gcloud/access_tokens.db
 fi
+
+GCLOUD_ADC_PATH="/home/gitpod/.config/gcloud/application_default_credentials.json"
+if [[ -n $GCP_ADC_CREDENTIALS ]] && ! [[ -f $GCLOUD_ADC_PATH ]]; then
+    mkdir -p ~/.config/gcloud
+    echo "Restoring GCP application default credentials"
+    echo "$GCP_ADC_FILE" > $GCLOUD_ADC_FILE
+fi
+export GOOGLE_APPLICATION_CREDENTIALS="$GCLOUD_ADC_PATH"
