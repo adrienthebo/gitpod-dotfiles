@@ -17,8 +17,8 @@ __gcloud_install() {
 
     asdf install gcloud latest
 
-    asdf exec gcloud components install gke-gcloud-auth-plugin
-    local latest="$(asdf list gcloud | tail -n 1 | tr -d '[:space]')"
+    asdf exec gcloud components install gke-gcloud-auth-plugin --quiet
+    local latest="$(asdf list gcloud | tail -n1 | tr -d '[:space:]')"
 
     asdf global gcloud "$latest"
     asdf reshim gcloud "$latest"
