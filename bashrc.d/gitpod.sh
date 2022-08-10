@@ -2,6 +2,9 @@
 
 eval "$(gp env -e)"
 
+# TODO: move this to `profile.d` when that directory is wired up.
+BROWSER="/ide/bin/helpers/browser.sh"
+
 if [[ -f "$GITPOD_REPO_ROOT/.env" ]]; then
     echo "Loading environment variables from $GITPOD_REPO_ROOT/.env"
     set -x
