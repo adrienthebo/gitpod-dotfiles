@@ -17,15 +17,16 @@ __gcloud_install() {
 
     asdf install gcloud latest
 
+    local latest="$(asdf list gcloud | tail -n1 | tr -d '[:space:]')"
+
+    asdf global gcloud "$latest"
+
     asdf exec gcloud components install gke-gcloud-auth-plugin --quiet
 
     if ! command -v kubectl 1>/dev/null; then
         asdf exec gcloud components install kubectl --quiet
     fi
 
-    local latest="$(asdf list gcloud | tail -n1 | tr -d '[:space:]')"
-
-    asdf global gcloud "$latest"
     asdf reshim gcloud "$latest"
 }
 
