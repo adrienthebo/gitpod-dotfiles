@@ -21,7 +21,7 @@ __autoinit_handle() {
         if [[ "${plugin}" = $CMD ]]; then
             # shellcheck disable=2068
             echo "$AUTOINIT_DIR/autoinit-$CMD" autorun $@
-            "$AUTOINIT_DIR/autoinit-$CMD" autorun $@
+            __autoinit_autorun "$CMD" $@
             return $?
         fi
     done
@@ -39,6 +39,14 @@ __autoinit_install() {
 }
 
 
+__autoinit_autorun() {
+    local cmd="$1"
+    shift
+
+    "$AUTOINIT_DIR/autoinit-$cmd" autorun $@
+}
+
+
 __autoinit_alias_fn() {
     declare -F $1 > /dev/null || return 1
     eval "$(echo "${2}()"; declare -f ${1} | tail -n +2)"
@@ -47,19 +55,16 @@ __autoinit_alias_fn() {
 
 __autoinit_register() {
     local plugin="$1"
+    __autoinit_debug "autoinit-register: registering '${plugin}'"
 
     __autoinit_plugins+=("$plugin")
-    __autoinit_debug "autoinit-register plugins: '${__autoinit_plugins}'"
-
     __autoinit_unloaded_plugins+=("$plugin")
-    __autoinit_debug "autoinit-register unloaded='${__autoinit_unloaded_plugins}'"
+    __autoinit_debug "autoinit-register: registered plugins='${__autoinit_plugins[@]}', unloaded='${__autoinit_unloaded_plugins[@]}'"
 }
 
 
 __autoinit_autoload() {
     local plugin
-
-    __autoinit_debug "autoinit-autoload: unloaded=${__autoinit_unloaded_plugins[*]}"
 
     for plugin in ${__autoinit_unloaded_plugins[*]}; do
         __autoinit_autoload_plugin "$plugin"
@@ -161,6 +166,11 @@ autoinit() {
         autoload)
             __autoinit_autoload
             ;;
+
+        autorun)
+            __autoinit_autorun "$cmd" "${args[@]}"
+            ;;
+
 
         install)
             __autoinit_install "${args[@]}"
