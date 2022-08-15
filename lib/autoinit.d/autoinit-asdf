@@ -63,9 +63,9 @@ __asdf_autorun() {
 }
 
 main() {
-    ARG="$1"
+    local cmd="$1"
     shift
-    case "$ARG" in
+    case "$cmd" in
         "init")
             __asdf_init
             ;;
@@ -95,6 +95,7 @@ main() {
             exit $?
             ;;
         *)
+            echo "Error: unknown command '$cmd'"
             echo "Usage: $0 [init|install|is-active|is-installed]"
             ;;
     esac
