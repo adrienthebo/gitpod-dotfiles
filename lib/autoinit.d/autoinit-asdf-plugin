@@ -115,6 +115,7 @@ main() {
             exit $?
             ;;
         *)
+            echo "Error: Unknown command '$cmd'"
             echo "Usage: $0 PLUGIN [init|install|is-active|is-installed]"
             ;;
     esac

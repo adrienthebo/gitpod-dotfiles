@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+AUTOINIT_D="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
+
+
+__autoinit_cmctl_init() {
+    "${AUTOINIT_D}/autoinit-asdf-plugin" "cmctl" "init"
+    echo "eval \"\$(cmctl completion bash)\""
+}
+
+
+main() {
+    local cmd="$1"
+    
+    case "$cmd" in
+        init)
+            __autoinit_cmctl_init 
+            ;;
+            
+        *)
+            "${AUTOINIT_D}/autoinit-asdf-plugin" "cmctl" $@
+            ;;
+    esac
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    # shellcheck disable=SC2068
+    main $@
+fi

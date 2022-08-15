@@ -112,6 +112,7 @@ __autoinit_init() {
     __autoinit_register "gcloud"
     __autoinit_register "kubectl-kots"
     __autoinit_register "helm"
+    __autoinit_register "cmctl"
 }
 
 
@@ -183,7 +184,7 @@ autoinit() {
             ;;
 
         help|*)
-            echo "usage: autoinit [init|install|autoload|unload|status|help]"
+            echo "usage: autoinit [init|init-plugin|install|autoload|unload|status|help]"
             ;;
     esac
 }
