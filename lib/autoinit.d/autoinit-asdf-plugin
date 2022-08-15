@@ -3,11 +3,14 @@
 FUNCTION_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")"
 source "$FUNCTION_DIR/functions.sh"
 
+AUTOINIT_D="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
+AUTOINIT_ASDF="${AUTOINIT_D}/autoinit-asdf"
+
 __autoinit_asdf_plugin_init() {
     local plugin="$1"
-    local latest="$(asdf list "$plugin" | tail -n1 | tr -d '[:space:]')"
+    local latest="$("$AUTOINIT_ASDF" list "$plugin" | tail -n1 | tr -d '[:space:]')"
     cat - <<EOD
-asdf reshim "$plugin" "$latest"
+$AUTOINIT_ASDF autorun asdf reshim "$plugin" "$latest"
 EOD
 }
 
@@ -15,13 +18,13 @@ EOD
 __autoinit_asdf_plugin_install() {
     local plugin="$1"
 
-    asdf plugin add "$plugin"
-    asdf install "$plugin" latest
+    "$AUTOINIT_ASDF" plugin add "$plugin"
+    "$AUTOINIT_ASDF" install "$plugin" latest
 
-    local latest="$(asdf list "$plugin" | tail -n1 | tr -d '[:space:]')"
+    local latest="$("$AUTOINIT_ASDF" list "$plugin" | tail -n1 | tr -d '[:space:]')"
 
-    asdf global "$plugin" "$latest"
-    asdf reshim "$plugin" "$latest"
+    "$AUTOINIT_ASDF" global "$plugin" "$latest"
+    "$AUTOINIT_ASDF" reshim "$plugin" "$latest"
 }
 
 
@@ -36,7 +39,7 @@ __autoinit_asdf_plugin_is_active() {
 __autoinit_asdf_plugin_is_installed() {
     local plugin="$1"
 
-    asdf list "$plugin" 2>/dev/null 1>/dev/null
+    "$AUTOINIT_ASDF" list "$plugin" 2>/dev/null 1>/dev/null
     return $?
 }
 
@@ -44,7 +47,7 @@ __autoinit_asdf_plugin_is_installed() {
 __autoinit_asdf_plugin_is_ready() {
     local plugin="$1"
 
-    if __autoinit_asdf_plugin_is_installed "$plugin" && ! __autoinit_asdf_plugin_is_active "$plugin" && ! command -v "$plugin" 1>/dev/null; then
+    if "$AUTOINIT_ASDF" is-ready && __autoinit_asdf_plugin_is_installed "$plugin" && ! __autoinit_asdf_plugin_is_active "$plugin" && ! command -v "$plugin" 1>/dev/null; then
         return 0
     else
         return 1
