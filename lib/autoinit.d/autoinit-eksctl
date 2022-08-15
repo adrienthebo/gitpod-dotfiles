@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+AUTOINIT_D="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
+
+
+__autoinit_cmctl_init() {
+    "${AUTOINIT_D}/autoinit-asdf-plugin" "eksctl" "init"
+    echo "eval \"\$(eksctl completion bash)\""
+}
+
+
+main() {
+    local cmd="$1"
+    
+    case "$cmd" in
+        init)
+            __autoinit_cmctl_init 
+            ;;
+            
+        *)
+            "${AUTOINIT_D}/autoinit-asdf-plugin" "eksctl" $@
+            ;;
+    esac
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    # shellcheck disable=SC2068
+    main $@
+fi
