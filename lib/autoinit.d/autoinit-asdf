@@ -2,7 +2,10 @@
 
 
 __asdf_init() {
-    echo -e "source \"$HOME/.asdf/asdf.sh\""
+    cat - <<EOD
+source "$HOME/.asdf/asdf.sh"
+source "$HOME/.asdf/completions/asdf.bash"
+EOD
 }
 
 
