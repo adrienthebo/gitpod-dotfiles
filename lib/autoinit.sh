@@ -94,7 +94,7 @@ __autoinit_status() {
                 $("${AUTOINIT_DIR}/autoinit-$plugin" is-active && echo "active" || echo "inactive") \
             "
 
-        done
+        done | sort
     ) | sed -e 's/ \+/ /g' | column -t
 
 }
@@ -110,7 +110,8 @@ __autoinit_init() {
     __autoinit_register "asdf"
     __autoinit_register "kubectl-krew"
     __autoinit_register "gcloud"
-
+    __autoinit_register "kubectl-kots"
+    __autoinit_register "helm"
 }
 
 

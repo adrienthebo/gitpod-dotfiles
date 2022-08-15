@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+AUTOINIT_D="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
+
+
+main() {
+    "${AUTOINIT_D}/autoinit-asdf-plugin" "helm" $@
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    # shellcheck disable=SC2068
+    main $@
+fi

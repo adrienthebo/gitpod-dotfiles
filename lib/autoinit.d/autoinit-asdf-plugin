@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+
+FUNCTION_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")"
+source "$FUNCTION_DIR/functions.sh"
+
+__autoinit_asdf_plugin_init() {
+    local plugin="$1"
+    local latest="$(asdf list "$plugin" | tail -n1 | tr -d '[:space:]')"
+    cat - <<EOD
+asdf reshim "$plugin" "$latest"
+EOD
+}
+
+
+__autoinit_asdf_plugin_install() {
+    local plugin="$1"
+
+    asdf plugin add "$plugin"
+    asdf install "$plugin" latest
+
+    local latest="$(asdf list "$plugin" | tail -n1 | tr -d '[:space:]')"
+
+    asdf global "$plugin" "$latest"
+    asdf reshim "$plugin" "$latest"
+}
+
+
+__autoinit_asdf_plugin_is_active() {
+    local plugin="$1"
+
+    [[ $(command -v "$plugin") = "$ASDF_DIR/shims/$plugin" ]]
+    return $?
+}
+
+
+__autoinit_asdf_plugin_is_installed() {
+    local plugin="$1"
+
+    asdf list "$plugin" 2>/dev/null 1>/dev/null
+    return $?
+}
+
+
+__autoinit_asdf_plugin_is_ready() {
+    local plugin="$1"
+
+    if __autoinit_asdf_plugin_is_installed "$plugin" && ! __autoinit_asdf_plugin_is_active "$plugin" && ! command -v "$plugin" 1>/dev/null; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+
+__autoinit_asdf_plugin_autoload() {
+    local plugin="$1"
+
+    if ! __autoinit_asdf_plugin_is_installed "$plugin"; then
+        __autoinit_asdf_plugin_install "$plugin"
+        rc=$?
+        if [[ $rc -ne 0 ]]; then
+            return $rc
+        fi
+    fi
+
+    if ! __autoinit_asdf_plugin_is_active "$plugin"; then
+        eval "$(__autoinit_asdf_plugin_init "$plugin")"
+    fi
+}
+
+__autoinit_asdf_plugin_autorun() {
+    local plugin="$1"
+    shift
+    local argv="$@"
+
+    __autoinit_asdf_plugin_autoload "$plugin" || return 254
+
+    $argv
+    return $?
+}
+
+main() {
+    local plugin="$1"
+    shift
+    local cmd="$1"
+    shift
+
+    case "$cmd" in
+        "init")
+            __autoinit_asdf_plugin_init "$plugin"
+            ;;
+
+        "install")
+            __autoinit_asdf_plugin_install "$plugin"
+            ;;
+
+        "is-active")
+            __autoinit_asdf_plugin_is_active "$plugin"
+            ;;
+
+        "is-installed")
+            __autoinit_asdf_plugin_is_installed "$plugin"
+            ;;
+
+        "is-ready")
+            __autoinit_asdf_plugin_is_ready "$plugin"
+            ;;
+
+        "autoload")
+            __autoinit_asdf_plugin_autoload "$plugin"
+            ;;
+
+        "autorun")
+            __autoinit_asdf_plugin_autorun "$plugin" $@
+            exit $?
+            ;;
+        *)
+            echo "Usage: $0 PLUGIN [init|install|is-active|is-installed]"
+            ;;
+    esac
+
+}
+
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    # shellcheck disable=SC2068
+    main $@
+fi
