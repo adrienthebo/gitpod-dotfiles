@@ -14,7 +14,7 @@ __autoinit_asdf_call() {
 
     $__AUTOINIT_ASDF autorun asdf $argv
     rc=$?
-    __autoinit_debug "autoinit-asdf-plugin/call: '${argv[@]}' returned $rc"
+    __autoinit_debug "autoinit-asdf-plugin/call: '$__AUTOINIT_ASDF autorun asdf $argv' returned $rc"
     return $rc
 }
 
