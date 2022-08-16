@@ -7,7 +7,7 @@ AUTOINIT_DIR="$FUNCTION_DIR/autoinit.d"
 
 __autoinit_debug() {
     if [[ -n $__AUTOINIT_DEBUG ]]; then
-        echo $@
+        echo $@ 1>&2
     fi
 }
 

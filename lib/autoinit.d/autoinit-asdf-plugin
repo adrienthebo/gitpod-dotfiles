@@ -1,14 +1,27 @@
 #!/usr/bin/env bash
 
-FUNCTION_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")"
-source "$FUNCTION_DIR/functions.sh"
+__LIBDIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")"
+source "${__LIBDIR}/functions.sh"
+source "${__LIBDIR}/autoinit.sh"
 
-AUTOINIT_D="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
-AUTOINIT_ASDF="${AUTOINIT_D}/autoinit-asdf"
+__AUTOINIT_ASDF="${__LIBDIR}/autoinit.d/autoinit-asdf"
+
+
+__autoinit_asdf_call() {
+    local argv=$@
+
+    __autoinit_debug "autoinit-asdf-plugin/call: calling '$__AUTOINIT_ASDF autorun asdf $argv'"
+
+    $__AUTOINIT_ASDF autorun asdf $argv
+    rc=$?
+    __autoinit_debug "autoinit-asdf-plugin/call: '${argv[@]}' returned $rc"
+    return $rc
+}
+
 
 __autoinit_asdf_plugin_init() {
     local plugin="$1"
-    local latest="$("$AUTOINIT_ASDF" list "$plugin" | tail -n1 | tr -d '[:space:]')"
+    local latest="$(__autoinit_asdf_call list "$plugin" | tail -n1 | tr -d '[:space:]')"
     cat - <<EOD
 $AUTOINIT_ASDF autorun asdf reshim "$plugin" "$latest"
 EOD
@@ -18,13 +31,13 @@ EOD
 __autoinit_asdf_plugin_install() {
     local plugin="$1"
 
-    "$AUTOINIT_ASDF" plugin add "$plugin"
-    "$AUTOINIT_ASDF" install "$plugin" latest
+    __autoinit_asdf_call plugin add "$plugin"
+    __autoinit_asdf_call install "$plugin" latest
 
-    local latest="$("$AUTOINIT_ASDF" list "$plugin" | tail -n1 | tr -d '[:space:]')"
+    local latest="$(__autoinit_asdf_call list "$plugin" | tail -n1 | tr -d '[:space:]')"
 
-    "$AUTOINIT_ASDF" global "$plugin" "$latest"
-    "$AUTOINIT_ASDF" reshim "$plugin" "$latest"
+    __autoinit_asdf_call global "$plugin" "$latest"
+    __autoinit_asdf_call reshim "$plugin" "$latest"
 }
 
 
@@ -39,7 +52,7 @@ __autoinit_asdf_plugin_is_active() {
 __autoinit_asdf_plugin_is_installed() {
     local plugin="$1"
 
-    "$AUTOINIT_ASDF" list "$plugin" 2>/dev/null 1>/dev/null
+    __autoinit_asdf_call list "$plugin" 2>/dev/null 1>/dev/null
     return $?
 }
 
@@ -47,7 +60,7 @@ __autoinit_asdf_plugin_is_installed() {
 __autoinit_asdf_plugin_is_ready() {
     local plugin="$1"
 
-    if "$AUTOINIT_ASDF" is-ready && __autoinit_asdf_plugin_is_installed "$plugin" && ! __autoinit_asdf_plugin_is_active "$plugin" && ! command -v "$plugin" 1>/dev/null; then
+    if "$__AUTOINIT_ASDF" is-ready && __autoinit_asdf_plugin_is_installed "$plugin" && ! __autoinit_asdf_plugin_is_active "$plugin" && ! command -v "$plugin" 1>/dev/null; then
         return 0
     else
         return 1
