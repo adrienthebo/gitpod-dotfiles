@@ -161,6 +161,20 @@ __autoinit_exec() {
 }
 
 
+__autoinit_configure() {
+    local plugin="$1"
+
+    "${__AUTOINIT_DIR}/autoinit-$plugin" configure
+}
+
+
+__autoinit_describe() {
+    local plugin="$1"
+
+    "${__AUTOINIT_DIR}/autoinit-$plugin" describe
+}
+
+
 __autoinit_unload() {
     echo "autoinit: unloading"
     __autoinit_clear
@@ -198,6 +212,8 @@ EOD
         install         Install an autoinit plugin
         autoload        Initialize all plugins that are ready for use
         autorun         Run (and initialize if necessary) a plugin command
+        configure       Run plugin configuration (such as authorization and heavyweight setup)
+        describe        Display plugin configuration information
 
     Other commands:
         help            Show this help
@@ -254,6 +270,14 @@ autoinit() {
 
         autorun)
             __autoinit_autorun "$cmd" "${args[@]}"
+            ;;
+
+        configure)
+            __autoinit_configure "${args[0]}"
+            ;;
+
+        describe)
+            __autoinit_describe "${args[0]}"
             ;;
 
         help|"")
