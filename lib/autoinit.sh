@@ -31,7 +31,7 @@ __autoinit_handle() {
             return $?
         fi
     done
-    echo "$(basename $SHELL): $CMD: command not found"
+    echo "$(basename $SHELL): $cmd: command not found"
     return 127
 }
 
