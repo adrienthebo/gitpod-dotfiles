@@ -116,7 +116,7 @@ __autoinit_status() {
                 $(
                     "${__AUTOINIT_DIR}/autoinit-$plugin" is-shadowed \
                         && color grey bold "ok" \
-                        || color black bold "shadowed"
+                        || color yellow bold "shadowed"
                 ) \
             "
 
