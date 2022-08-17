@@ -26,7 +26,9 @@ __autoinit_handle() {
             __autoinit_autorun "$cmd" $argv
             local rc=$?
 
-            echo "$(color blue "autoinit: $cmd auto-installed, run 'autoinit autoload' to update your environment")"
+            if [[ $(type -t "$plugin") = "function" ]]; then
+                echo "$(color blue "autoinit: $cmd auto-installed, run 'autoinit autoload' to update your environment")"
+            fi
 
             return $?
         fi
