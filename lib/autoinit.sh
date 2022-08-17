@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
-FUNCTION_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
+__LIBDIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 
-AUTOINIT_DIR="$FUNCTION_DIR/autoinit.d"
+__AUTOINIT_DIR="${__LIBDIR}/autoinit.d"
+
+source "${__LIBDIR}/colors.sh"
 
 
 __autoinit_debug() {
@@ -20,7 +22,7 @@ __autoinit_handle() {
     for plugin in "${__autoinit_plugins[@]}"; do
         if [[ "${plugin}" = $CMD ]]; then
             # shellcheck disable=2068
-            echo "$AUTOINIT_DIR/autoinit-$CMD" autorun $@
+            echo "$__AUTOINIT_DIR/autoinit-$CMD" autorun $@
             __autoinit_autorun "$CMD" $@
             return $?
         fi
@@ -33,7 +35,7 @@ __autoinit_install() {
     local plugin plugins
     plugins=($1)
     for plugin in "${plugins[@]}"; do
-      "$AUTOINIT_DIR/autoinit-$plugin" install
+      "$__AUTOINIT_DIR/autoinit-$plugin" install
       __autoinit_autoload_plugin "$plugin"
     done
 }
@@ -43,7 +45,7 @@ __autoinit_autorun() {
     local cmd="$1"
     shift
 
-    "$AUTOINIT_DIR/autoinit-$cmd" autorun $@
+    "$__AUTOINIT_DIR/autoinit-$cmd" autorun $@
 }
 
 
@@ -76,10 +78,10 @@ __autoinit_autoload_plugin() {
     local plugin="$1"
     __autoinit_debug "autoinit-autoload: checking '$plugin'"
 
-    if "${AUTOINIT_DIR}/autoinit-$plugin" is-ready; then
+    if "${__AUTOINIT_DIR}/autoinit-$plugin" is-ready; then
         __autoinit_debug "autoinit-autoload: initializing $plugin"
 
-        eval "$("${AUTOINIT_DIR}/autoinit-$plugin" init)"
+        eval "$("${__AUTOINIT_DIR}/autoinit-$plugin" init)"
 
         __autoinit_unloaded_plugins=("${__autoinit_unloaded_plugins[@]/$plugin}" )
     else
@@ -95,8 +97,16 @@ __autoinit_status() {
         for plugin in ${__autoinit_plugins[*]}; do
             echo " \
                 $plugin \
-                $("${AUTOINIT_DIR}/autoinit-$plugin" is-installed && echo "installed" || echo "not-installed") \
-                $("${AUTOINIT_DIR}/autoinit-$plugin" is-active && echo "active" || echo "inactive") \
+                $(
+                    "${__AUTOINIT_DIR}/autoinit-$plugin" is-installed \
+                        && color green bold "installed" \
+                        || color grey italic "not-installed"
+                ) \
+                $(
+                    "${__AUTOINIT_DIR}/autoinit-$plugin" is-active \
+                        && color green bold "active" \
+                        || color grey italic "inactive"
+                ) \
             "
 
         done | sort
@@ -125,7 +135,7 @@ __autoinit_init_plugin() {
     local plugin plugins
     plugins=($@)
     for plugin in "${plugins[@]}"; do
-        eval "$("${AUTOINIT_DIR}/autoinit-$plugin" init)"
+        eval "$("${__AUTOINIT_DIR}/autoinit-$plugin" init)"
     done
 }
 
@@ -143,7 +153,7 @@ __autoinit_clear() {
 __autoinit_run() {
     local plugin=$1
     shift
-    "${AUTOINIT_DIR}/autoinit-$plugin" $@
+    "${__AUTOINIT_DIR}/autoinit-$plugin" $@
 }
 
 __autoinit_usage() {

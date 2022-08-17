@@ -1,65 +1,30 @@
 #!/usr/bin/env bash
 
-# Credit: https://gist.github.com/jorgerance/68a923be4c975e5d705627271b65254b
-#
-# Define ANSI color escape code
-# color <ansi_color_code>
+# Credit: https://github.com/molovo/color/blob/master/color.zsh
+
 
 color() {
-    printf "\033[${1}m";
+  local color=$1 style=$2 b=0
+
+  shift
+
+  case $style in
+    bold|b)           b=1; shift ;;
+    italic|i)         b=2; shift ;;
+    underline|u)      b=4; shift ;;
+    inverse|in)       b=7; shift ;;
+    strikethrough|s)  b=9; shift ;;
+  esac
+
+  case $color in
+    black|b)    echo -ne "\033[${b};30m${@}\033[0;m" ;;
+    red|r)      echo -ne "\033[${b};31m${@}\033[0;m" ;;
+    green|g)    echo -ne "\033[${b};32m${@}\033[0;m" ;;
+    yellow|y)   echo -ne "\033[${b};33m${@}\033[0;m" ;;
+    blue|bl)    echo -ne "\033[${b};34m${@}\033[0;m" ;;
+    magenta|m)  echo -ne "\033[${b};35m${@}\033[0;m" ;;
+    cyan|c)     echo -ne "\033[${b};36m${@}\033[0;m" ;;
+    white|w)    echo -ne "\033[${b};37m${@}\033[0;m" ;;
+    *)          echo -ne "\033[${b};38;5;$(( ${color} ))m${@}\033[0;m" ;;
+  esac
 }
-
-# No Color
-NO_COLOR=$(color "0")
-NC=${NO_COLOR}
-RESET_ALL='\033[0m'
-
-# Stiles
-BOLD='\e[1m'
-ITALIC='\e[3m'
-UNDERLINE='\e[4m'
-
-# Black        0;30
-# Dark Gray    1;30
-BLACK=$(color "0;30")
-DARK_GRAY=$(color "1;30")
-LIGHT_BLACK=${DARK_GRAY}
-
-# Red          0;31
-# Light Red    1;31
-RED=$(color "0;31")
-BOLD_RED=$(color "1;31")
-
-# Green        0;32
-# Light Green  1;32
-GREEN=$(color "0;32")
-BOLD_GREEN=$(color "1;32")
-# Brown/Orange 0;33
-# Yellow       1;33
-BROWN=$(color "0;33")
-ORANGE=${BROWN}
-YELLOW=$(color "0;33")
-BOLD_BROWN=${YELLOW}
-LIGHT_ORANGE=${YELLOW}
-
-# Blue         0;34
-# Light Blue   1;34
-BLUE=$(color "0;34")
-BOLD_BLUE=$(color "1;34")
-
-# Purple       0;35
-# Light Purple 1;35
-PURPLE=$(color "0;35")
-BOLD_PURPLE=$(color "1;35")
-
-# Cyan         0;36
-# Light Cyan   1;36
-CYAN=$(color "0;36")
-BOLD_CYAN=$(color "1;36")
-
-# Light Gray   0;37
-# White        1;37
-GRAY=$(color "0;37")
-BOLD_WHITE=$(color "1;37")
-STANDARD=${LIGTH_GRAY}
-LIGHT_STANDARD=${WHITE}
