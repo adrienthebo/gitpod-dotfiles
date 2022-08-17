@@ -99,7 +99,7 @@ __autoinit_status() {
     local plugin
 
     (
-        echo "Name Status Loaded"
+        echo "Name Status Loaded Shadowed"
         for plugin in ${__autoinit_plugins[*]}; do
             echo " \
                 $plugin \
@@ -112,6 +112,11 @@ __autoinit_status() {
                     "${__AUTOINIT_DIR}/autoinit-$plugin" is-active \
                         && color green bold "active" \
                         || color grey italic "inactive"
+                ) \
+                $(
+                    "${__AUTOINIT_DIR}/autoinit-$plugin" is-shadowed \
+                        && color grey bold "ok" \
+                        || color black bold "shadowed"
                 ) \
             "
 

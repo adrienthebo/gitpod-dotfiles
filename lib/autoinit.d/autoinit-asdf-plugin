@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
 __LIBDIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")"
-source "${__LIBDIR}/functions.sh"
 source "${__LIBDIR}/autoinit.sh"
+source "${__LIBDIR}/colors.sh"
+source "${__LIBDIR}/functions.sh"
 
 __AUTOINIT_ASDF="${__LIBDIR}/autoinit.d/autoinit-asdf"
 
@@ -44,7 +45,7 @@ __autoinit_asdf_plugin_install() {
 __autoinit_asdf_plugin_is_active() {
     local plugin="$1"
 
-    [[ $(command -v "$plugin") = "$ASDF_DIR/shims/$plugin" ]]
+    [[ $(command -v "$plugin") =~ "$ASDF_DIR/shims/$plugin" ]]
     return $?
 }
 
@@ -68,6 +69,20 @@ __autoinit_asdf_plugin_is_ready() {
 }
 
 
+__autoinit_asdf_plugin_is_shadowed() {
+    local plugin="$1"
+    local executable="${2:-$plugin}"
+
+    if ! command -v "$executable" 1>/dev/null; then
+        __autoinit_debug "asdf-plugin/is-shadowed ($plugin): executable=$executable, no executable found - not shadowed"
+        return 0
+    else
+       [[ $(which "$executable" | head -n1) =~ "$ASDF_DIR/shims/$executable" ]]
+       return $?
+    fi
+}
+
+
 __autoinit_asdf_plugin_autoload() {
     local plugin="$1"
 
@@ -75,6 +90,7 @@ __autoinit_asdf_plugin_autoload() {
         __autoinit_asdf_plugin_install "$plugin"
         rc=$?
         if [[ $rc -ne 0 ]]; then
+            echo "autoinit-asdf-plugin/autoload: cannot autoload $plugin (install returned $rc)" 1>&2
             return $rc
         fi
     fi
@@ -100,6 +116,10 @@ main() {
     shift
     local cmd="$1"
     shift
+    local argv=($@)
+
+    __autoinit_debug "autoinit-asdf-plugin/main: plugin=$plugin cmd=$cmd argv=$argv"
+
 
     case "$cmd" in
         "init")
@@ -108,6 +128,15 @@ main() {
 
         "install")
             __autoinit_asdf_plugin_install "$plugin"
+            ;;
+
+        "autorun")
+            __autoinit_asdf_plugin_autorun "$plugin" $@
+            exit $?
+            ;;
+
+        "autoload")
+            __autoinit_asdf_plugin_autoload "$plugin"
             ;;
 
         "is-active")
@@ -122,17 +151,14 @@ main() {
             __autoinit_asdf_plugin_is_ready "$plugin"
             ;;
 
-        "autoload")
-            __autoinit_asdf_plugin_autoload "$plugin"
+        "is-shadowed")
+            local executable="${argv[0]}"
+            __autoinit_asdf_plugin_is_shadowed "$plugin" "$executable"
             ;;
 
-        "autorun")
-            __autoinit_asdf_plugin_autorun "$plugin" $@
-            exit $?
-            ;;
         *)
-            echo "Error: Unknown command '$cmd'"
-            echo "Usage: $0 PLUGIN [init|install|is-active|is-installed]"
+            echo "Error: Unknown command '$cmd'" 1>&2
+            echo "Usage: $0 PLUGIN [init|install|is-active|is-installed]" 1>&2
             ;;
     esac
 

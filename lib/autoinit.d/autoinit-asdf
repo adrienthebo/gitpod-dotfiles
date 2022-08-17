@@ -30,6 +30,11 @@ __asdf_is_installed() {
 }
 
 
+__asdf_is_shadowed() {
+    ! [[ $(type -t asdf) == "function" ]]
+}
+
+
 __asdf_is_ready() {
     if __asdf_is_installed && ! __asdf_is_active; then
         return 0
@@ -55,7 +60,7 @@ __asdf_autoload() {
 
 __asdf_autorun() {
     ARGV="$@"
-    
+
     __asdf_autoload || return 254
 
     $ARGV
@@ -73,17 +78,21 @@ main() {
         "install")
             __asdf_install
             ;;
-            
+
         "is-active")
             __asdf_is_active
             ;;
-            
+
         "is-installed")
             __asdf_is_installed
             ;;
-            
+
         "is-ready")
             __asdf_is_ready
+            ;;
+
+        "is-shadowed")
+            __asdf_is_shadowed
             ;;
 
         "autoload")
@@ -99,7 +108,7 @@ main() {
             echo "Usage: $0 [init|install|is-active|is-installed]"
             ;;
     esac
-        
+
 }
 
 

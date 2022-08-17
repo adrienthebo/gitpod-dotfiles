@@ -25,14 +25,14 @@ __autoinit_aws_configure() {
             local aws_var_unset=true
         fi
     done
-    
+
     if ! [[ -z "$aws_var_unset" ]]; then
         local script=$(realpath "$0")
         echo "AWS Variables are not set, skipping autoconfig of files"
         echo "Re-run ${script} when AWS_ variables are set"
         return 1
     fi
-    
+
     echo "autoinit-aws: Forcing AWS config to just use SSO credentials"
     [[ -d /home/gitpod/.aws ]] || mkdir /home/gitpod/.aws
     cat <<- AWSFILE > /home/gitpod/.aws/config
@@ -52,7 +52,7 @@ AWSFILE
     elif [ ! -f /home/gitpod/.docker/config.json ]; then
         echo '{}' > /home/gitpod/.docker/config.json
     fi
-    
+
     echo "autoinit-aws: Ensuring Docker Config uses ecr-login for ECR repositories"
 
     cp /home/gitpod/.docker/config.json /home/gitpod/.docker/config_bak.json
@@ -82,10 +82,10 @@ EOD
 
 main() {
     local cmd="$1"
-    
+
     case "$cmd" in
         init)
-            __autoinit_aws_init 
+            __autoinit_aws_init
             ;;
         configure)
             __autoinit_aws_configure
@@ -93,6 +93,10 @@ main() {
 
         describe)
             __autoinit_aws_describe
+            ;;
+
+        is-shadowed)
+            "${AUTOINIT_D}/autoinit-asdf-plugin" "awscli" is-shadowed "aws"
             ;;
 
         *)

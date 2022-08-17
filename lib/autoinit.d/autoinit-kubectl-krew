@@ -68,6 +68,16 @@ __krew_is_ready() {
 }
 
 
+__krew_is_shadowed() {
+    if ! command -v kubectl-krew 1>/dev/null; then
+        return 0
+    else
+        [[ $(which kubectl-krew) = "$HOME/.krew/bin/kubectl-krew" ]]
+        return $?
+    fi
+}
+
+
 __krew_autoload() {
     if ! __krew_is_installed ; then
         __krew_install
@@ -113,6 +123,10 @@ main() {
 
         "is-ready")
             __krew_is_ready
+            ;;
+
+        "is-shadowed")
+            __krew_is_shadowed
             ;;
 
         "autoload")

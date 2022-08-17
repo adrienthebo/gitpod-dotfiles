@@ -52,6 +52,16 @@ __gcloud_is_ready() {
 }
 
 
+__gcloud_is_shadowed() {
+    if ! command -v gcloud 1>/dev/null; then
+        return 0
+    else
+        [[ $(which gcloud) = "$ASDF_DIR/shims/gcloud" ]]
+        return $?
+    fi
+}
+
+
 __gcloud_autoload() {
     if ! __gcloud_is_installed ; then
         __gcloud_install
@@ -98,6 +108,11 @@ main() {
         "is-ready")
             __gcloud_is_ready
             ;;
+
+        "is-shadowed")
+            __gcloud_is_shadowed
+            ;;
+
 
         "autoload")
             __gcloud_autoload
