@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+
+AUTOINIT_D="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
+
+
+__autoinit_aws_init() {
+    "${AUTOINIT_D}/autoinit-asdf-plugin" "awscli" "init"
+    cat - <<EOD
+if type asdf 1>/dev/null 2>/dev/null; then
+    complete -C "$(asdf which aws_completer)" aws
+fi
+EOD
+}
+
+
+__autoinit_aws_configure() {
+    local aws_var aws_vars
+
+    aws_vars=(AWS_SSO_URL AWS_SSO_REGION AWS_ACCOUNT_ID AWS_ROLE_NAME AWS_REGION)
+
+    for aws_var in "${aws_vars[@]}"; do
+      echo "$aws_var is ${!aws_var}"
+        if [[ -z "${!aws_var}" ]]; then
+            echo "Error: AWS variable \"$aws_var\" is unset"
+            local aws_var_unset=true
+        fi
+    done
+    
+    if ! [[ -z "$aws_var_unset" ]]; then
+        local script=$(realpath "$0")
+        echo "AWS Variables are not set, skipping autoconfig of files"
+        echo "Re-run ${script} when AWS_ variables are set"
+        return 1
+    fi
+    
+    echo "autoinit-aws: Forcing AWS config to just use SSO credentials"
+    [[ -d /home/gitpod/.aws ]] || mkdir /home/gitpod/.aws
+    cat <<- AWSFILE > /home/gitpod/.aws/config
+[default]
+sso_start_url = ${AWS_SSO_URL}
+sso_region = ${AWS_SSO_REGION}
+sso_account_id = ${AWS_ACCOUNT_ID}
+sso_role_name = ${AWS_ROLE_NAME}
+region = ${AWS_REGION}
+AWSFILE
+
+    # update docker config to use ecr-login
+    # if we don't have a .docker/config.json, create:
+
+    if [ ! -d /home/gitpod/.docker ]; then
+        mkdir -p /home/gitpod/.docker && echo '{}' > /home/gitpod/.docker/config.json
+    elif [ ! -f /home/gitpod/.docker/config.json ]; then
+        echo '{}' > /home/gitpod/.docker/config.json
+    fi
+    
+    echo "autoinit-aws: Ensuring Docker Config uses ecr-login for ECR repositories"
+
+    cp /home/gitpod/.docker/config.json /home/gitpod/.docker/config_bak.json
+    jq '.credHelpers["public.ecr.aws"]="ecr-login"' /home/gitpod/.docker/config.json > /home/gitpod/.docker/config_tmp.json
+    jq ".credHelpers[\"${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com\"]=\"ecr-login\"" /home/gitpod/.docker/config_tmp.json > /home/gitpod/.docker/config.json
+    rm /home/gitpod/.docker/config_tmp.json
+
+    echo "autoinit-aws: Start an AWS SSO login session"
+
+    BROWSER="/ide/bin/helpers/browser.sh" aws sso login && aws sts get-caller-identity
+}
+
+
+__autoinit_aws_describe() {
+    cat - <<EOD
+Configure awscliv2 and load AWS credentials.
+
+Environment variables:
+- AWS_SSO_URL="${AWS_SSO_URL}"
+- AWS_SSO_REGION="${AWS_SSO_REGION}"
+- AWS_ACCOUNT_ID="${AWS_ACCOUNT_ID}"
+- AWS_ROLE_NAME="${AWS_ROLE_NAME}"
+- AWS_REGION="${AWS_REGION}"
+EOD
+}
+
+
+main() {
+    local cmd="$1"
+    
+    case "$cmd" in
+        init)
+            __autoinit_aws_init 
+            ;;
+        configure)
+            __autoinit_aws_configure
+            ;;
+
+        describe)
+            __autoinit_aws_describe
+            ;;
+
+        *)
+            "${AUTOINIT_D}/autoinit-asdf-plugin" "awscli" $@
+            ;;
+    esac
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    # shellcheck disable=SC2068
+    main $@
+fi

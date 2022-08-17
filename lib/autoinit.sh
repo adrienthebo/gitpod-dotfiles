@@ -132,6 +132,7 @@ __autoinit_init() {
     __autoinit_register "kubectl-kots"
     __autoinit_register "helm"
     __autoinit_register "cmctl"
+    __autoinit_register "aws"
 }
 
 
