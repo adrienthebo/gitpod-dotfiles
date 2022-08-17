@@ -14,16 +14,20 @@ __autoinit_debug() {
 }
 
 __autoinit_handle() {
-    local ARGV="$@"
-    local CMD="$1"
+    local argv="$@"
+    local cmd="$1"
 
     # shellcheck disable=2199
     local plugin
     for plugin in "${__autoinit_plugins[@]}"; do
-        if [[ "${plugin}" = $CMD ]]; then
+        if [[ "${plugin}" = $cmd ]]; then
             # shellcheck disable=2068
-            echo "$__AUTOINIT_DIR/autoinit-$CMD" autorun $@
-            __autoinit_autorun "$CMD" $@
+            echo "$(color blue "autoinit: handling $cmd")"
+            __autoinit_autorun "$cmd" $argv
+            local rc=$?
+
+            echo "$(color blue "autoinit: $cmd auto-installed, run 'autoinit autoload' to update your environment")"
+
             return $?
         fi
     done
