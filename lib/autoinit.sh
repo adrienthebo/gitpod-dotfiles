@@ -146,6 +146,37 @@ __autoinit_run() {
     "${AUTOINIT_DIR}/autoinit-$plugin" $@
 }
 
+__autoinit_usage() {
+    echo "usage: autoinit [init|init-plugin|install|autoload|unload|status|help]"
+}
+
+
+__autoinit_help() {
+    cat - <<EOD
+$(__autoinit_usage)
+
+Commands:
+EOD
+
+    cat - <<EOD
+    Manage autoinit:
+        init            Initialize autoinit
+        list            List all plugins
+        reload          Reload autoinit and autoinit plugins
+        unload          Unload autoinit from the environment
+
+    Interact with autoinit plugins:
+        init-plugin     Initialize an installed autoinit plugin
+        install         Install an autoinit plugin
+        autoload        Initialize all plugins that are ready for use
+        autorun         Run (and initialize if necessary) a plugin command
+
+    Other commands:
+        help            Show this help
+
+EOD
+}
+
 autoinit() {
     local cmd=$1
     shift
@@ -159,30 +190,8 @@ autoinit() {
                 && __autoinit_status
             ;;
 
-        init-plugin)
-            __autoinit_init_plugin "${args[@]}"
-            ;;
-
-        autoload)
-            __autoinit_autoload
-            ;;
-
-        autorun)
-            __autoinit_autorun "$cmd" "${args[@]}"
-            ;;
-
-
-        install)
-            __autoinit_install "${args[@]}"
-            __autoinit_autoload
-            ;;
-
         status|list)
             __autoinit_status
-            ;;
-
-        unload)
-            __autoinit_unload
             ;;
 
         reload)
@@ -193,8 +202,33 @@ autoinit() {
                 && __autoinit_status
             ;;
 
-        help|*)
-            echo "usage: autoinit [init|init-plugin|install|autoload|unload|status|help]"
+        unload)
+            __autoinit_unload
+            ;;
+
+        init-plugin)
+            __autoinit_init_plugin "${args[@]}"
+            ;;
+
+        install)
+            __autoinit_install "${args[@]}"
+            __autoinit_autoload
+            ;;
+
+        autoload)
+            __autoinit_autoload
+            ;;
+
+        autorun)
+            __autoinit_autorun "$cmd" "${args[@]}"
+            ;;
+
+        help|"")
+            __autoinit_help
+            ;;
+        *)
+            echo "Error: unknown command ${cmd}" 1>&2
+            echo "$(__autoinit_usage)" 1>&2
             ;;
     esac
 }
