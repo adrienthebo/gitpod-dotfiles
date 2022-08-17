@@ -144,10 +144,21 @@ __autoinit_init_plugin() {
     done
 }
 
+
+__autoinit_exec() {
+    local plugin="$1"
+    shift
+    local argv="$@"
+
+    "${__AUTOINIT_DIR}/autoinit-$plugin" $@
+}
+
+
 __autoinit_unload() {
     echo "autoinit: unloading"
     __autoinit_clear
 }
+
 
 __autoinit_clear() {
     unset __autoinit_plugins
@@ -155,11 +166,6 @@ __autoinit_clear() {
     unset command_not_found_handle
 }
 
-__autoinit_run() {
-    local plugin=$1
-    shift
-    "${__AUTOINIT_DIR}/autoinit-$plugin" $@
-}
 
 __autoinit_usage() {
     echo "usage: autoinit [init|init-plugin|install|autoload|unload|status|help]"
@@ -228,6 +234,11 @@ autoinit() {
         install)
             __autoinit_install "${args[@]}"
             __autoinit_autoload
+            ;;
+
+        exec)
+            # shellcheck disable=SC2086
+            __autoinit_exec $args
             ;;
 
         autoload)
