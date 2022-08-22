@@ -19,8 +19,9 @@ __asdf_install() {
 
 
 __asdf_is_active() {
-    [[ -n $ASDF_DIR ]]
-    return $?
+    [[ "$(which asdf)" = "$ASDF_DIR/bin/asdf" ]]
+    rc=$?
+    return $rc
 }
 
 
