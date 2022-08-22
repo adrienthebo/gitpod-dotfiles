@@ -232,6 +232,9 @@ EOD
         configure       Run plugin configuration (such as authorization and heavyweight setup)
         describe        Display plugin configuration information
 
+    Developer commands:
+        exec            Run an autoinit plugin subcommand
+
     Other commands:
         help            Show this help
 
