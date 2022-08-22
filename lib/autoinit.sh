@@ -21,19 +21,20 @@ __autoinit_handle() {
     local plugin
     for plugin in "${__autoinit_plugins[@]}"; do
         if [[ "${plugin}" = $cmd ]]; then
-            # shellcheck disable=2068
+            # shellcheck disable=2005
             echo "$(color blue "autoinit: handling $cmd")"
             __autoinit_autorun "$cmd" $argv
             local rc=$?
 
             if [[ $(type -t "$plugin") = "function" ]]; then
+                # shellcheck disable=2005
                 echo "$(color blue "autoinit: $cmd auto-installed, run 'autoinit autoload' to update your environment")"
             fi
 
             return $?
         fi
     done
-    echo "$(basename $SHELL): $cmd: command not found"
+    echo "$(basename "$SHELL"): $cmd: command not found"
     return 127
 }
 
