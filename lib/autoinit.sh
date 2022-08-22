@@ -135,12 +135,13 @@ __autoinit_init() {
     __autoinit_alias_fn "__autoinit_handle" "command_not_found_handle"
 
     __autoinit_register "asdf"
-    __autoinit_register "kubectl-krew"
-    __autoinit_register "gcloud"
-    __autoinit_register "kubectl-kots"
-    __autoinit_register "helm"
-    __autoinit_register "cmctl"
     __autoinit_register "aws"
+    __autoinit_register "bat"
+    __autoinit_register "cmctl"
+    __autoinit_register "gcloud"
+    __autoinit_register "helm"
+    __autoinit_register "kubectl-kots"
+    __autoinit_register "kubectl-krew"
 }
 
 
