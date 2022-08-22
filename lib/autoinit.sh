@@ -157,6 +157,11 @@ __autoinit_exec() {
     shift
     local argv="$@"
 
+    if [[ -z $plugin ]] || [[ -z $argv ]]; then
+        echo "usage: autoinit exec PLUGIN COMMAND" 1>&2
+        return 1
+    fi
+
     "${__AUTOINIT_DIR}/autoinit-$plugin" $@
 }
 
@@ -164,12 +169,22 @@ __autoinit_exec() {
 __autoinit_configure() {
     local plugin="$1"
 
+    if [[ -z $plugin ]]; then
+        echo "usage: autoinit configure PLUGIN" 1>&2
+        return 1
+    fi
+
     "${__AUTOINIT_DIR}/autoinit-$plugin" configure
 }
 
 
 __autoinit_describe() {
     local plugin="$1"
+
+    if [[ -z $plugin ]]; then
+        echo "usage: autoinit describe PLUGIN" 1>&2
+        return 1
+    fi
 
     "${__AUTOINIT_DIR}/autoinit-$plugin" describe
 }
