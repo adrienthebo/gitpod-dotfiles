@@ -5,11 +5,17 @@ AUTOINIT_D="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 
 __autoinit_aws_init() {
     "${AUTOINIT_D}/autoinit-asdf-plugin" "awscli" "init"
-    cat - <<EOD
-if type asdf 1>/dev/null 2>/dev/null; then
-    complete -C "$(asdf which aws_completer)" aws
+    if [[ $? -eq 0 ]]; then
+        cat - <<EOD
+complete -C "$(asdf which aws_completer)" aws
+EOD
+    else
+        cat - <<EOD
+if command -v aws_completer 1>/dev/null; then
+    complete -C "$(which aws_completer)" aws
 fi
 EOD
+    fi
 }
 
 
@@ -93,6 +99,10 @@ main() {
 
         describe)
             __autoinit_aws_describe
+            ;;
+
+        autoload)
+            "${AUTOINIT_D}/autoinit-asdf-plugin" "awscli" autoload
             ;;
 
         is-shadowed)
