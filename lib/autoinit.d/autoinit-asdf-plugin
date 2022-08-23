@@ -22,10 +22,21 @@ __autoinit_asdf_call() {
 
 __autoinit_asdf_plugin_init() {
     local plugin="$1"
-    local latest="$(__autoinit_asdf_call list "$plugin" | tail -n1 | tr -d '[:space:]')"
-    cat - <<EOD
-$__AUTOINIT_ASDF autorun asdf reshim "$plugin" "$latest"
+    if ! $__AUTOINIT_ASDF is-installed ; then
+        echo "echo 'asdf is not installed, cannot init $plugin'"
+        return 1
+    elif ! __autoinit_asdf_call list "$plugin" 1>/dev/null 2>/dev/null; then
+        echo "echo 'asdf plugin \'$plugin\' is not installed, cannot init'"
+        return 1
+    else
+        cat - <<EOD
+{
+    local version="$($__AUTOINIT_ASDF autorun asdf list "$plugin" | tail -n1 | tr -d '[:space:]')"
+    $__AUTOINIT_ASDF autorun asdf global "$plugin" "\$version"
+    $__AUTOINIT_ASDF autorun asdf reshim "$plugin" "\$version"
+}
 EOD
+    fi
 }
 
 
