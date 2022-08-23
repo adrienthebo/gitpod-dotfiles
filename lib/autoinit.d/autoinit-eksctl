@@ -5,7 +5,7 @@ AUTOINIT_D="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 
 __autoinit_cmctl_init() {
     "${AUTOINIT_D}/autoinit-asdf-plugin" "eksctl" "init"
-    echo "eval \"\$(eksctl completion bash)\""
+    echo "eval \"\$(cmctl completion bash)\""
 }
 
 
