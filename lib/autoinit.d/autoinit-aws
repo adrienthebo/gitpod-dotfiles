@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 AUTOINIT_D="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
+__LIBDIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")"
+source "${__LIBDIR}/colors.sh"
 
 
 __autoinit_aws_init() {
@@ -25,7 +27,7 @@ __autoinit_aws_configure() {
     aws_vars=(AWS_SSO_URL AWS_SSO_REGION AWS_ACCOUNT_ID AWS_ROLE_NAME AWS_REGION)
 
     for aws_var in "${aws_vars[@]}"; do
-      echo "$aws_var is ${!aws_var}"
+      echo "$(color blue "autoinit-aws: $aws_var is ${!aws_var}")"
         if [[ -z "${!aws_var}" ]]; then
             echo "Error: AWS variable \"$aws_var\" is unset"
             local aws_var_unset=true
@@ -39,7 +41,7 @@ __autoinit_aws_configure() {
         return 1
     fi
 
-    echo "autoinit-aws: Forcing AWS config to just use SSO credentials"
+    echo "$(color blue "autoinit-aws: Forcing AWS config to just use SSO credentials")"
     [[ -d /home/gitpod/.aws ]] || mkdir /home/gitpod/.aws
     cat <<- AWSFILE > /home/gitpod/.aws/config
 [default]
@@ -59,29 +61,41 @@ AWSFILE
         echo '{}' > /home/gitpod/.docker/config.json
     fi
 
-    echo "autoinit-aws: Ensuring Docker Config uses ecr-login for ECR repositories"
+    echo "$(color blue "autoinit-aws: Ensuring Docker Config uses ecr-login for ECR repositories")"
 
     cp /home/gitpod/.docker/config.json /home/gitpod/.docker/config_bak.json
     jq '.credHelpers["public.ecr.aws"]="ecr-login"' /home/gitpod/.docker/config.json > /home/gitpod/.docker/config_tmp.json
     jq ".credHelpers[\"${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com\"]=\"ecr-login\"" /home/gitpod/.docker/config_tmp.json > /home/gitpod/.docker/config.json
     rm /home/gitpod/.docker/config_tmp.json
 
-    echo "autoinit-aws: Start an AWS SSO login session"
+    echo "$(color blue "autoinit-aws: Start an AWS SSO login session")"
 
-    BROWSER="/ide/bin/helpers/browser.sh" aws sso login && aws sts get-caller-identity
+    if aws sts get-caller-identity 1>/dev/null 2>/dev/null; then
+        echo "$(color blue "autoinit-aws: AWS credentials already loaded, run 'aws sso login' to re-authenticate")"
+    else
+        BROWSER="/ide/bin/helpers/browser.sh" aws sso login && aws sts get-caller-identity
+    fi
+
+    if [[ -n $EKS_CLUSTER ]]; then
+        echo "$(color blue "autoinit-aws: load kubectl configuration for $EKS_CLUSTER")"
+        aws eks update-kubeconfig --name "$EKS_CLUSTER"
+    fi
 }
 
 
 __autoinit_aws_describe() {
     cat - <<EOD
-Configure awscliv2 and load AWS credentials.
+Configure awscliv2, load AWS credentials, and configure EKS kubectl credentials.
 
 Environment variables:
-- AWS_SSO_URL="${AWS_SSO_URL}"
-- AWS_SSO_REGION="${AWS_SSO_REGION}"
-- AWS_ACCOUNT_ID="${AWS_ACCOUNT_ID}"
-- AWS_ROLE_NAME="${AWS_ROLE_NAME}"
-- AWS_REGION="${AWS_REGION}"
+    - API access (used with 'aws sso login'):
+        - AWS_SSO_URL="${AWS_SSO_URL}"
+        - AWS_SSO_REGION="${AWS_SSO_REGION}"
+        - AWS_ACCOUNT_ID="${AWS_ACCOUNT_ID}"
+        - AWS_ROLE_NAME="${AWS_ROLE_NAME}"
+        - AWS_REGION="${AWS_REGION}"
+    - EKS (used with 'aws eks update-kubeconfig'):
+        - EKS_CLUSTER="${EKS_CLUSTER}"
 EOD
 }
 
