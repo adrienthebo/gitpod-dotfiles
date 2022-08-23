@@ -85,6 +85,34 @@ __gcloud_autorun() {
     return $?
 }
 
+
+__gcloud_configure() {
+    # gcloud auth login
+
+    local adc_file="${GOOGLE_APPLICATION_CREDENTIALS:-$HOME/.config/gcloud/application_default_credentials.json}"
+    if [[ -n $GCP_ADC_FILE ]] && ! [[ -f $adc_file ]]; then
+        # shellcheck disable=SC2005
+        echo "$(color blue "autoinit-gcloud: writing application default credentials to $adc_file")"
+        mkdir -p "$(dirname "$adc_file")"
+        echo "$GCP_ADC_FILE" > "$adc_file"
+    fi
+}
+
+
+__gcloud_describe() {
+
+    cat - <<EOD
+Manage gcloud, cloudsdk plugins, and gcloud credentials.
+
+Environment variables:
+    - GCP_ADC_FILE="${GCP_ADC_FILE}"
+    - GOOGLE_APPLICATION_CREDENTIALS="${GOOGLE_APPLICATION_CREDENTIALS}"
+EOD
+    for var in $(env | awk -F= '/CLOUDSDK/ { print $1 }'); do
+        echo "    - ${var}=\"${!var}\""
+    done
+}
+
 main() {
     ARG="$1"
     shift
@@ -113,7 +141,6 @@ main() {
             __gcloud_is_shadowed
             ;;
 
-
         "autoload")
             __gcloud_autoload
             ;;
@@ -122,6 +149,15 @@ main() {
             __gcloud_autorun "$@"
             exit $?
             ;;
+
+        "configure")
+            __gcloud_configure
+            ;;
+
+        "describe")
+            __gcloud_describe
+            ;;
+
         *)
             echo "Usage: $0 [init|install|is-active|is-installed]"
             ;;
