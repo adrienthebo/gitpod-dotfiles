@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+AUTOINIT_D="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
+
+
+__autoinit_kubectl_init() {
+    "${AUTOINIT_D}/autoinit-asdf-plugin" "kubectl" "init"
+    echo "eval \"\$(kubectl completion bash)\""
+}
+
+
+__autoinit_kubectl_describe() {
+    cat - <<EOD
+Install and manage kubectl
+
+Environment variables:
+    - AUTOINIT_KUBECTL_VERSION="${AUTOINIT_KUBECTL_VERSION}"
+EOD
+}
+
+
+main() {
+    local cmd="$1"
+    
+    case "$cmd" in
+        init)
+            __autoinit_kubectl_init 
+            ;;
+
+        describe)
+            __autoinit_kubectl_describe
+            ;;
+            
+        *)
+            "${AUTOINIT_D}/autoinit-asdf-plugin" "kubectl" $@
+            ;;
+    esac
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    # shellcheck disable=SC2068
+    main $@
+fi
