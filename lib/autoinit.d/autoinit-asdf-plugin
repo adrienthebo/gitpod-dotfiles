@@ -44,12 +44,20 @@ __autoinit_asdf_plugin_install() {
     local plugin="$1"
 
     __autoinit_asdf_call plugin add "$plugin"
-    __autoinit_asdf_call install "$plugin" latest
+    
+    local plugin_version_var="AUTOINIT_${plugin^^}_VERSION"
+    local plugin_version="${!plugin_version_var:latest}"
+    
+    __autoinit_debug "autoinit-asdf-plugin/install: resolved plugin version to '${plugin_version}'"
+    
+    __autoinit_asdf_call install "$plugin" "$plugin_version"
+    
+    if [[ $plugin_version == "latest" ]]; then
+        plugin_version="$(__autoinit_asdf_call list "$plugin" | tail -n1 | tr -d '[:space:]')"
+    fi
 
-    local latest="$(__autoinit_asdf_call list "$plugin" | tail -n1 | tr -d '[:space:]')"
-
-    __autoinit_asdf_call global "$plugin" "$latest"
-    __autoinit_asdf_call reshim "$plugin" "$latest"
+    __autoinit_asdf_call global "$plugin" "$plugin_version"
+    __autoinit_asdf_call reshim "$plugin" "$plugin_version"
 }
 
 
