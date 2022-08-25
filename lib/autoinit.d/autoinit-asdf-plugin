@@ -46,7 +46,7 @@ __autoinit_asdf_plugin_install() {
     __autoinit_asdf_call plugin add "$plugin"
     
     local plugin_version_var="AUTOINIT_${plugin^^}_VERSION"
-    local plugin_version="${!plugin_version_var:latest}"
+    local plugin_version="${!plugin_version_var:-latest}"
     
     __autoinit_debug "autoinit-asdf-plugin/install: resolved plugin version to '${plugin_version}'"
     
@@ -71,8 +71,9 @@ __autoinit_asdf_plugin_is_active() {
 
 __autoinit_asdf_plugin_is_installed() {
     local plugin="$1"
+    local executable="${2:-$plugin}"
 
-    __autoinit_asdf_call list "$plugin" 2>/dev/null 1>/dev/null
+    __autoinit_asdf_call where "$plugin" 2>/dev/null 1>/dev/null
     return $?
 }
 
@@ -106,12 +107,15 @@ __autoinit_asdf_plugin_autoload() {
     local plugin="$1"
 
     if ! __autoinit_asdf_plugin_is_installed "$plugin"; then
+        __autoinit_debug "autoinit-asdf-plugin/autoload ($plugin): plugin absent, triggering install"
         __autoinit_asdf_plugin_install "$plugin"
         rc=$?
         if [[ $rc -ne 0 ]]; then
             echo "autoinit-asdf-plugin/autoload: cannot autoload $plugin (install returned $rc)" 1>&2
             return $rc
         fi
+    else
+        __autoinit_debug "autoinit-asdf-plugin/autoload ($plugin): plugin installed, skipping install"
     fi
 
     if ! __autoinit_asdf_plugin_is_active "$plugin"; then
