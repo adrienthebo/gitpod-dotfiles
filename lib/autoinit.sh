@@ -13,6 +13,17 @@ __autoinit_debug() {
     fi
 }
 
+
+__autoinit_error() {
+    echo "$(color red bold "Error: $@")" 1>&2
+}
+
+
+__autoinit_log() {
+    echo "$@" 1>&2
+}
+
+
 __autoinit_handle() {
     local argv="$@"
     local cmd="$1"
@@ -147,8 +158,16 @@ __autoinit_init() {
 
 
 __autoinit_init_plugin() {
-    local plugin plugins
+    local plugins
     plugins=($@)
+
+    if [[ ${#plugins[@]} -lt 1 ]]; then
+        __autoinit_error "No plugins passed to init-plugin"
+        __autoinit_log "Usage: autoinit init-plugin PLUGIN ..."
+        return 1
+    fi
+
+    local plugin
     for plugin in "${plugins[@]}"; do
         eval "$("${__AUTOINIT_DIR}/autoinit-$plugin" init)"
     done
