@@ -23,10 +23,10 @@ __autoinit_asdf_call() {
 __autoinit_asdf_plugin_init() {
     local plugin="$1"
     if ! $__AUTOINIT_ASDF is-installed ; then
-        echo "echo 'asdf is not installed, cannot init $plugin'"
+        echo "echo \"asdf is not installed, cannot init '$plugin'\""
         return 1
     elif ! __autoinit_asdf_call list "$plugin" 1>/dev/null 2>/dev/null; then
-        echo "echo 'asdf plugin \'$plugin\' is not installed, cannot init'"
+        echo "echo \"asdf plugin \'$plugin\' is not installed, cannot init\""
         return 1
     else
         cat - <<EOD

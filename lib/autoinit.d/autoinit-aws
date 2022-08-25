@@ -14,6 +14,7 @@ EOD
     else
         cat - <<EOD
 if command -v aws_completer 1>/dev/null; then
+    echo "aws_completer is available (even though awscli isn't available), initializing completion"
     complete -C "$(which aws_completer)" aws
 fi
 EOD
