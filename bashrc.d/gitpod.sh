@@ -12,13 +12,14 @@ if [[ -f "$GITPOD_REPO_ROOT/.env" ]]; then
     set +x
 fi
 
-reload_dotfiles() {
+__gitpod_reload_dotfiles() {
     source "$HOME/.dotfiles/script/reload"
 }
+alias gitpod-reload-dotfiles="__gitpod_reload_dotfiles"
 
-alias kotsup="kubectl kots install gitpod --namespace gitpod --shared-password=gitpod --no-port-forward"
+alias gitpod-kotsup="kubectl kots install gitpod --namespace gitpod --shared-password=gitpod --no-port-forward"
 
-kotsdash() {
+__gitpod_kotsdash() {
     local __kotsport="$(( ( $RANDOM % 63535 ) + 2000 ))"
 
     (
@@ -28,3 +29,10 @@ kotsdash() {
 
     kubectl kots admin-console --namespace gitpod --port "$__kotsport"
 }
+alias gitpod-kotsdash="__gitpod_kotsdash"
+
+__gitpod_license() {
+    gsutil cp "gs://adrien-self-hosted-testing-5k4-license-25500/license.yaml" .
+}
+
+alias gitpod-get-license="__gitpod_license"
