@@ -18,10 +18,7 @@ fi
     
 eval "\$(atuin init "$(basename "$SHELL")")"
 
-if [[ -n \$ATUIN_USERNAME ]] && [[ -n \$ATUIN_PASSWORD ]]; then
-    atuin login -u "\$ATUIN_USERNAME" -p "\$ATUIN_PASSWORD"
-    echo what 1>&2
-fi
+echo "$(color blue "autoinit-atuin: consider logging in with autoinit configure atuin")" 1>&2
 EOD
 }
 
@@ -81,7 +78,11 @@ __autoinit_atuin_autorun() {
 
 
 __autoinit_atuin_configure() {
-    echo "todo"
+    if [[ -n $ATUIN_USERNAME ]] && [[ -n $ATUIN_PASSWORD ]]; then
+        atuin login -u "$ATUIN_USERNAME" -p "$ATUIN_PASSWORD"
+    fi
+    atuin import "$(basename "$SHELL")"
+    atuin sync
 }
 
 
