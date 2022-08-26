@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-FUNCTION_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")"
-source "$FUNCTION_DIR/functions.sh"
+readonly __LIBDIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")"
+source "${__LIBDIR}/colors.sh"
+source "${__LIBDIR}/functions.sh"
 
 __gcloud_init() {
     local latest="$(asdf list gcloud | tail -n1 | tr -d '[:space:]')"
@@ -90,11 +91,22 @@ __gcloud_configure() {
     # gcloud auth login
 
     local adc_file="${GOOGLE_APPLICATION_CREDENTIALS:-$HOME/.config/gcloud/application_default_credentials.json}"
-    if [[ -n $GCP_ADC_FILE ]] && ! [[ -f $adc_file ]]; then
-        # shellcheck disable=SC2005
-        echo "$(color blue "autoinit-gcloud: writing application default credentials to $adc_file")"
-        mkdir -p "$(dirname "$adc_file")"
-        echo "$GCP_ADC_FILE" > "$adc_file"
+    if [[ -n $GCP_ADC_FILE ]]; then
+        if ! [[ -f $adc_file ]]; then
+            # shellcheck disable=SC2005
+            echo "$(color blue "autoinit-gcloud: writing application default credentials to $adc_file")"
+            mkdir -p "$(dirname "$adc_file")"
+            echo "$GCP_ADC_FILE" > "$adc_file"
+        else
+            echo "$(color green "autoinit-gcloud: application default credentials already present at $adc_file")"
+        fi
+    fi
+
+    if gcloud auth list --format=json | jq -e 'length == 0' 1>/dev/null; then
+        echo "$(color blue "autoinit-gcloud: no cloudsdk credentials present, starting login")"
+        gcloud auth login
+    else
+        echo "$(color green "autoinit-gcloud: cloudsdk credentials present, no login required")"
     fi
 }
 
