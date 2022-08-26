@@ -1,0 +1,155 @@
+#!/usr/bin/env bash
+
+readonly __LIBDIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")"
+source "${__LIBDIR}/colors.sh"
+source "${__LIBDIR}/functions.sh"
+
+__autoinit_atuin_init() {
+    # shellcheck disable=SC2016
+    cat - <<EOD
+    
+
+if [[ $(basename "$SHELL") == "bash" ]]; then
+    if ! [[ -f $HOME/.bash-preexec.sh ]]; then
+        curl https://raw.githubusercontent.com/rcaloras/bash-preexec/master/bash-preexec.sh -o ~/.bash-preexec.sh
+    fi
+    source ~/.bash-preexec.sh
+fi
+    
+eval "\$(atuin init "$(basename "$SHELL")")"
+
+if [[ -n \$ATUIN_USERNAME ]] && [[ -n \$ATUIN_PASSWORD ]]; then
+    atuin login -u "\$ATUIN_USERNAME" -p "\$ATUIN_PASSWORD"
+    echo what 1>&2
+fi
+EOD
+}
+
+
+__autoinit_atuin_install() {
+    bash <(curl https://raw.githubusercontent.com/ellie/atuin/main/install.sh)
+}
+
+
+__autoinit_atuin_is_active() {
+    __autoinit_atuin_is_installed
+}
+
+
+__autoinit_atuin_is_installed() {
+    command -v atuin 1>/dev/null
+    return $?
+}
+
+
+__autoinit_atuin_is_ready() {
+    if __autoinit_atuin_is_installed && ! __autoinit_atuin_is_active && ! command -v gcloud 1>/dev/null; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+
+__autoinit_atuin_is_shadowed() {
+    return 0
+}
+
+
+__autoinit_atuin_autoload() {
+    if ! __autoinit_atuin_is_installed ; then
+        __autoinit_atuin_install
+        rc=$?
+        if [[ $rc -ne 0 ]]; then
+            return $rc
+        fi
+    fi
+
+    if ! __autoinit_atuin_is_active ; then
+        eval "$(__autoinit_atuin_init)"
+    fi
+}
+
+__autoinit_atuin_autorun() {
+    ARGV="$@"
+
+    __autoinit_atuin_autoload || return 254
+
+    $ARGV
+    return $?
+}
+
+
+__autoinit_atuin_configure() {
+    echo "todo"
+}
+
+
+__autoinit_atuin_describe() {
+
+    cat - <<EOD
+Atuin: magical shell history <https://atuin.sh/>
+
+Environment variables:
+    - ATUIN_USERNAME="${ATUIN_USERNAME}"
+    - ATUIN_PASSWORD="${ATUIN_PASSWORD}"
+EOD
+}
+
+main() {
+    ARG="$1"
+    shift
+    case "$ARG" in
+        "init")
+            __autoinit_atuin_init
+            ;;
+
+        "install")
+            __autoinit_atuin_install
+            ;;
+
+        "is-active")
+            __autoinit_atuin_is_active
+            ;;
+
+        "is-installed")
+            __autoinit_atuin_is_installed
+            ;;
+
+        "is-ready")
+            __autoinit_atuin_is_ready
+            ;;
+
+        "is-shadowed")
+            __autoinit_atuin_is_shadowed
+            ;;
+
+        "autoload")
+            __autoinit_atuin_autoload
+            ;;
+
+        "autorun")
+            __autoinit_atuin_autorun "$@"
+            exit $?
+            ;;
+
+        "configure")
+            __autoinit_atuin_configure
+            ;;
+
+        "describe")
+            __autoinit_atuin_describe
+            ;;
+
+        *)
+            echo "Usage: $0 [init|install|is-active|is-installed]"
+            ;;
+    esac
+
+}
+
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    # shellcheck disable=SC2068
+    main $@
+fi
