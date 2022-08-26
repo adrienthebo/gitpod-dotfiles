@@ -14,7 +14,14 @@ __autoinit_debug() {
 }
 
 
+__autoinit_warn() {
+    # shellcheck disable=SC2005
+    echo "$(color yellow bold "Warning: $@")" 1>&2
+}
+
+
 __autoinit_error() {
+    # shellcheck disable=SC2005
     echo "$(color red bold "Error: $@")" 1>&2
 }
 

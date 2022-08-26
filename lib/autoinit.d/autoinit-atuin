@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
-readonly __LIBDIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")"
+__LIBDIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")"
 source "${__LIBDIR}/colors.sh"
 source "${__LIBDIR}/functions.sh"
+source "${__LIBDIR}/autoinit.sh"
 
 __autoinit_atuin_init() {
     # shellcheck disable=SC2016
@@ -78,8 +79,15 @@ __autoinit_atuin_autorun() {
 
 
 __autoinit_atuin_configure() {
-    if [[ -n $ATUIN_USERNAME ]] && [[ -n $ATUIN_PASSWORD ]]; then
-        atuin login -u "$ATUIN_USERNAME" -p "$ATUIN_PASSWORD"
+    if [[ -n $ATUIN_USERNAME ]] && [[ -n $ATUIN_PASSWORD ]] && [[ -n $ATUIN_KEY ]]; then
+        local atuin_session="~/.local/share/atuin/session"
+        if [[ -f $atuin_session ]]; then
+            echo "$(color green "autoinit-atuin: already logged in to atuin server")"
+        else
+            atuin login -u "$ATUIN_USERNAME" -p "$ATUIN_PASSWORD" -k "$ATUIN_KEY"
+        fi
+    else
+        __autoinit_warn "autoinit-atuin cannot login, missing one of [ATUIN_USERNAME, ATUIN_PASSWORD, ATUIN_KEY]"
     fi
     atuin import "$(basename "$SHELL")"
     atuin sync
@@ -94,6 +102,7 @@ Atuin: magical shell history <https://atuin.sh/>
 Environment variables:
     - ATUIN_USERNAME="${ATUIN_USERNAME}"
     - ATUIN_PASSWORD="${ATUIN_PASSWORD}"
+    - ATUIN_KEY="${ATUIN_KEY}"
 EOD
 }
 
