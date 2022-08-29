@@ -160,6 +160,7 @@ __autoinit_init() {
     __autoinit_register "eksctl"
     __autoinit_register "gcloud"
     __autoinit_register "helm"
+    __autoinit_register "kubectl"
     __autoinit_register "kubectl-kots"
     __autoinit_register "kubectl-krew"
 }
