@@ -11,6 +11,11 @@ __AUTOINIT_ASDF="${__LIBDIR}/autoinit.d/autoinit-asdf"
 __autoinit_asdf_call() {
     local argv=$@
 
+    if ! "$__AUTOINIT_ASDF" is-installed; then
+        __autoinit_warn "autoinit-asdf-plugin: 'asdf' is not installed, triggering installation now"
+        "$__AUTOINIT_ASDF" install
+    fi
+
     __autoinit_debug "autoinit-asdf-plugin/call: calling '$__AUTOINIT_ASDF autorun asdf $argv'"
 
     $__AUTOINIT_ASDF autorun asdf $argv
@@ -44,15 +49,15 @@ __autoinit_asdf_plugin_install() {
     local plugin="$1"
 
     __autoinit_asdf_call plugin add "$plugin"
-    
+
     local plugin_version_var="AUTOINIT_${plugin^^}_VERSION"
     plugin_version_var="${plugin_version_var//-/_}"
     local plugin_version="${!plugin_version_var:-latest}"
-    
+
     __autoinit_debug "autoinit-asdf-plugin/install: resolved plugin version to '${plugin_version}'"
-    
+
     __autoinit_asdf_call install "$plugin" "$plugin_version"
-    
+
     if [[ $plugin_version == "latest" ]]; then
         plugin_version="$(__autoinit_asdf_call list "$plugin" | tail -n1 | tr -d '[:space:]')"
     fi
@@ -107,6 +112,11 @@ __autoinit_asdf_plugin_is_shadowed() {
 __autoinit_asdf_plugin_autoload() {
     local plugin="$1"
 
+    if ! "$__AUTOINIT_ASDF" is-installed; then
+        __autoinit_warn "autoinit-asdf-plugin/autoload ($plugin): asdf not present, installing asdf version manager"
+        "$__AUTOINIT_ASDF" install
+    fi
+
     if ! __autoinit_asdf_plugin_is_installed "$plugin"; then
         __autoinit_debug "autoinit-asdf-plugin/autoload ($plugin): plugin absent, triggering install"
         __autoinit_asdf_plugin_install "$plugin"
@@ -131,7 +141,8 @@ __autoinit_asdf_plugin_autorun() {
 
     __autoinit_asdf_plugin_autoload "$plugin" || return 254
 
-    $argv
+    __autoinit_asdf_call exec $argv
+
     return $?
 }
 

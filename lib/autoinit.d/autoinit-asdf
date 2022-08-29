@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 
 
+__LIBDIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")"
+source "${__LIBDIR}/autoinit.sh"
+source "${__LIBDIR}/colors.sh"
+
+
 __asdf_init() {
     cat - <<EOD
 source "$HOME/.asdf/asdf.sh"
@@ -61,6 +66,10 @@ __asdf_autoload() {
 
 __asdf_autorun() {
     ARGV="$@"
+
+    if ! __asdf_is_installed; then
+        __autoinit_warn "autoinit-asdf: triggering asdf install, consider running \`autoinit init-plugin asdf\`"
+    fi
 
     __asdf_autoload || return 254
 
