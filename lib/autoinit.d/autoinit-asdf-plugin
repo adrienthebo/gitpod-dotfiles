@@ -23,10 +23,10 @@ __autoinit_asdf_call() {
 __autoinit_asdf_plugin_init() {
     local plugin="$1"
     if ! $__AUTOINIT_ASDF is-installed ; then
-        echo "echo \"asdf is not installed, cannot init '$plugin'\""
+        echo "echo \"Error: asdf is not installed, cannot init '$plugin'\" 1>&2"
         return 1
     elif ! __autoinit_asdf_call list "$plugin" 1>/dev/null 2>/dev/null; then
-        echo "echo \"asdf plugin \'$plugin\' is not installed, cannot init\""
+        echo "echo \"Error: asdf plugin \'$plugin\' is not installed, cannot init\" 1>&2"
         return 1
     else
         cat - <<EOD
@@ -112,7 +112,7 @@ __autoinit_asdf_plugin_autoload() {
         __autoinit_asdf_plugin_install "$plugin"
         rc=$?
         if [[ $rc -ne 0 ]]; then
-            echo "autoinit-asdf-plugin/autoload: cannot autoload $plugin (install returned $rc)" 1>&2
+            __autoinit_error "autoinit-asdf-plugin/autoload: cannot autoload $plugin (install returned $rc)" 1>&2
             return $rc
         fi
     else
@@ -181,7 +181,7 @@ main() {
             ;;
 
         *)
-            echo "Error: Unknown command '$cmd'" 1>&2
+            __autoinit_error "autoinit-asdf-plugin: Unknown command '$cmd'"
             echo "Usage: $0 PLUGIN [init|install|is-active|is-installed]" 1>&2
             ;;
     esac
