@@ -236,6 +236,51 @@ __autoinit_clear() {
 }
 
 
+__autoinit_topic() {
+    local topic="$1"
+
+    case "$topic" in
+        "")
+            echo "Available topics: [hooks|lifecycle]"
+            ;;
+
+        "hooks")
+            cat - <<HOOKS
+# autoinit hooks
+
+todo: document 'command_not_found_handle'
+todo: document binstubs
+
+HOOKS
+            ;;
+        "lifecycle")
+            cat - <<LIFECYCLE
+# autoinit lifecycles
+
+## Lifecycle states
+
+- uninstalled
+- installed/inactive
+- activated
+- shadowed
+
+## Lifecycle transitions
+
+- "install"
+- "activate"
+- "init"
+- "configure"
+
+LIFECYCLE
+          ;;
+        *)
+          __autoinit_error "Unknown topic '$topic'"
+          return 1
+          ;;
+    esac
+}
+
+
 __autoinit_usage() {
     echo "usage: autoinit [init|init-plugin|install|autoload|unload|status|help]"
 }
@@ -329,6 +374,10 @@ autoinit() {
 
         describe)
             __autoinit_describe "${args[0]}"
+            ;;
+            
+        topic)
+            __autoinit_topic "${args[0]}"
             ;;
 
         help|"")
