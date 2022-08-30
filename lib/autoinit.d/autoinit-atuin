@@ -11,8 +11,6 @@ __autoinit_atuin_init() {
 source ~/.bash-preexec.sh
 eval "\$(atuin init "\$(basename "\$SHELL")")"
 eval "\$(atuin gen-completions --shell "\$(basename "\$SHELL")")"
-
-atuin import "\$(basename "\$SHELL")"
 EOD
 }
 
