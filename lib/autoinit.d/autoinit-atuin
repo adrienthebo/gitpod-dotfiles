@@ -16,10 +16,9 @@ if [[ $(basename "$SHELL") == "bash" ]]; then
     fi
     source ~/.bash-preexec.sh
 fi
-    
-eval "\$(atuin init "$(basename "$SHELL")")"
 
-echo "$(color blue "autoinit-atuin: consider logging in with autoinit configure atuin")" 1>&2
+eval "\$(atuin init "\$(basename "\$SHELL")")"
+eval "\$(atuin gen-completions --shell "\$(basename "\$SHELL")")"
 EOD
 }
 
