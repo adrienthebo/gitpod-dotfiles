@@ -20,3 +20,13 @@ git config --global color.status.added yellow
 git config --global color.status.untracked cyan
 
 git config --global diff.mnemonicprefix true
+
+git config --global commit.verbose true
+
+git config --global alias.ci 'commit -v'
+git config --global alias.st 'status --short --branch'
+git config --global alias.wat 'log --stat -p'
+git config --global alias.lg "log --pretty=format:'%C(yellow)%h%C(reset) %C(blue)%an%C(reset) %C(cyan)%cr%C(reset) %s %C(green)%d%C(reset)' --graph"
+git config --global alias.forward 'pull --ff-only'
+git config --global alias.redo 'commit --amend -C HEAD'
+git config --global alias.where 'rev-parse --abbrev-ref HEAD'
