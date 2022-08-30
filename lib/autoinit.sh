@@ -158,6 +158,7 @@ __autoinit_init() {
     __autoinit_register "bat"
     __autoinit_register "cmctl"
     __autoinit_register "eksctl"
+    __autoinit_register "fzf"
     __autoinit_register "gcloud"
     __autoinit_register "helm"
     __autoinit_register "kubectl"

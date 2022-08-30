@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+AUTOINIT_D="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
+
+
+main() {
+    local cmd="$1"
+    
+    case "$cmd" in
+        *)
+            "${AUTOINIT_D}/autoinit-asdf-plugin" "fzf" $@
+            ;;
+    esac
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    # shellcheck disable=SC2068
+    main $@
+fi
