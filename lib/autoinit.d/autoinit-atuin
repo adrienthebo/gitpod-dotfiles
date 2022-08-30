@@ -8,28 +8,27 @@ source "${__LIBDIR}/autoinit.sh"
 __autoinit_atuin_init() {
     # shellcheck disable=SC2016
     cat - <<EOD
-    
-
-if [[ $(basename "$SHELL") == "bash" ]]; then
-    if ! [[ -f $HOME/.bash-preexec.sh ]]; then
-        curl https://raw.githubusercontent.com/rcaloras/bash-preexec/master/bash-preexec.sh -o ~/.bash-preexec.sh
-    fi
-    source ~/.bash-preexec.sh
-fi
-
+source ~/.bash-preexec.sh
 eval "\$(atuin init "\$(basename "\$SHELL")")"
 eval "\$(atuin gen-completions --shell "\$(basename "\$SHELL")")"
 
 atuin import "\$(basename "\$SHELL")"
-
-[[ -n "\$AUTOINIT_ATUIN_AUTOCONFIGURE" ]] && "${BASH_SOURCE[0]}" configure
-[[ -n "\$AUTOINIT_ATUIN_SYNC_ON_EXIT" ]] && trap "atuin sync" EXIT
 EOD
 }
 
 
 __autoinit_atuin_install() {
     bash <(curl https://raw.githubusercontent.com/ellie/atuin/main/install.sh)
+
+    
+    if [[ $(basename "$SHELL") == "bash" ]]; then
+        if ! [[ -f $HOME/.bash-preexec.sh ]]; then
+            curl https://raw.githubusercontent.com/rcaloras/bash-preexec/master/bash-preexec.sh -o ~/.bash-preexec.sh
+        fi
+    fi
+
+    eval "$(__autoinit_atuin_init)"
+    [[ -n "\$AUTOINIT_ATUIN_AUTOCONFIGURE" ]] && "${BASH_SOURCE[0]}" configure
 }
 
 
@@ -83,6 +82,13 @@ __autoinit_atuin_autorun() {
 
 
 __autoinit_atuin_configure() {
+    mkdir -p "$HOME/.config/atuin"
+    cat > "$HOME/.config/atuin/config.toml" <<CONFIG
+auto_sync = true
+sync_frequency = "5m"
+search_mode = "fuzzy"
+CONFIG
+
     if [[ -n $ATUIN_USERNAME ]] && [[ -n $ATUIN_PASSWORD ]] && [[ -n $ATUIN_KEY ]]; then
         local atuin_session="~/.local/share/atuin/session"
         if [[ -f $atuin_session ]]; then
