@@ -103,11 +103,13 @@ __autoinit_atuin_describe() {
 Atuin: magical shell history <https://atuin.sh/>
 
 Environment variables:
-    - ATUIN_USERNAME="${ATUIN_USERNAME}"
-    - ATUIN_PASSWORD="${ATUIN_PASSWORD}"
-    - ATUIN_KEY="${ATUIN_KEY}"
-    - AUTOINIT_ATUIN_AUTOCONFIGURE="${AUTOINIT_ATUIN_AUTOCONFIGURE}
-    - AUTOINIT_ATUIN_SYNC_ON_EXIT="${AUTOINIT_ATUIN_SYNC_ON_EXIT}
+    - atuin.sh variables:
+        - ATUIN_USERNAME="${ATUIN_USERNAME}"
+        - ATUIN_PASSWORD="${ATUIN_PASSWORD}"
+        - ATUIN_KEY="${ATUIN_KEY}"
+    - autoinit-atuin configuration:
+      - AUTOINIT_ATUIN_AUTOCONFIGURE="${AUTOINIT_ATUIN_AUTOCONFIGURE}"
+      - AUTOINIT_ATUIN_SYNC_ON_EXIT="${AUTOINIT_ATUIN_SYNC_ON_EXIT}"
 EOD
 }
 
