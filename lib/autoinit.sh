@@ -163,6 +163,7 @@ __autoinit_init() {
     __autoinit_register "kubectl"
     __autoinit_register "kubectl-kots"
     __autoinit_register "kubectl-krew"
+    __autoinit_register "tldr"
 }
 
 
