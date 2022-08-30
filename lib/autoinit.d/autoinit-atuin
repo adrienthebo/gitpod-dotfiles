@@ -19,6 +19,11 @@ fi
 
 eval "\$(atuin init "\$(basename "\$SHELL")")"
 eval "\$(atuin gen-completions --shell "\$(basename "\$SHELL")")"
+
+atuin import "\$(basename "\$SHELL")"
+
+[[ -n "\$AUTOINIT_ATUIN_AUTOCONFIGURE" ]] && "${BASH_SOURCE[0]}" configure
+[[ -n "\$AUTOINIT_ATUIN_SYNC_ON_EXIT" ]] && trap "atuin sync" EXIT
 EOD
 }
 
@@ -88,7 +93,6 @@ __autoinit_atuin_configure() {
     else
         __autoinit_warn "autoinit-atuin cannot login, missing one of [ATUIN_USERNAME, ATUIN_PASSWORD, ATUIN_KEY]"
     fi
-    atuin import "$(basename "$SHELL")"
     atuin sync
 }
 
@@ -102,6 +106,8 @@ Environment variables:
     - ATUIN_USERNAME="${ATUIN_USERNAME}"
     - ATUIN_PASSWORD="${ATUIN_PASSWORD}"
     - ATUIN_KEY="${ATUIN_KEY}"
+    - AUTOINIT_ATUIN_AUTOCONFIGURE="${AUTOINIT_ATUIN_AUTOCONFIGURE}
+    - AUTOINIT_ATUIN_SYNC_ON_EXIT="${AUTOINIT_ATUIN_SYNC_ON_EXIT}
 EOD
 }
 
