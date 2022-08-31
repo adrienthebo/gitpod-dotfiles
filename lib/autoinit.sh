@@ -44,10 +44,7 @@ __autoinit_handle() {
             __autoinit_autorun "$cmd" $argv
             local rc=$?
 
-            if [[ $(type -t "$plugin") = "function" ]]; then
-                # shellcheck disable=2005
-                echo "$(color blue "autoinit: $cmd auto-installed, run 'autoinit autoload' to update your environment")"
-            fi
+            echo "$(color blue "autoinit: $cmd auto-installed, run 'autoinit init-plugin $plugin' to update your environment")"
 
             return $?
         fi
@@ -61,7 +58,7 @@ __autoinit_install() {
     plugins=($1)
     for plugin in "${plugins[@]}"; do
       "$__AUTOINIT_DIR/autoinit-$plugin" install
-      __autoinit_autoload_plugin "$plugin"
+      __autoinit_activate_plugin "$plugin"
     done
 }
 
@@ -90,27 +87,27 @@ __autoinit_register() {
 }
 
 
-__autoinit_autoload() {
+__autoinit_activate() {
     local plugin
 
     for plugin in ${__autoinit_unloaded_plugins[*]}; do
-        __autoinit_autoload_plugin "$plugin"
+        __autoinit_activate_plugin "$plugin"
     done
 }
 
 
-__autoinit_autoload_plugin() {
+__autoinit_activate_plugin() {
     local plugin="$1"
-    __autoinit_debug "autoinit-autoload: checking '$plugin'"
+    __autoinit_debug "autoinit-activate: checking '$plugin'"
 
     if "${__AUTOINIT_DIR}/autoinit-$plugin" is-ready; then
-        __autoinit_debug "autoinit-autoload: initializing $plugin"
+        __autoinit_debug "autoinit-activate: activating $plugin"
 
         eval "$("${__AUTOINIT_DIR}/autoinit-$plugin" init)"
 
         __autoinit_unloaded_plugins=("${__autoinit_unloaded_plugins[@]/$plugin}" )
     else
-        __autoinit_debug "autoinit-autoload: $plugin already loaded"
+        __autoinit_debug "autoinit-activate: $plugin already loaded"
     fi
 }
 
@@ -299,7 +296,7 @@ LIFECYCLE
 
 
 __autoinit_usage() {
-    echo "usage: autoinit [init|init-plugin|install|autoload|unload|status|help]"
+    echo "usage: autoinit [init|init-plugin|install|activate|unload|status|help]"
 }
 
 
@@ -320,7 +317,8 @@ EOD
     Interact with autoinit plugins:
         init-plugin     Initialize an installed autoinit plugin
         install         Install an autoinit plugin
-        autoload        Initialize all plugins that are ready for use
+        activate        Activate all installed but inactive plugins
+        autoload        Install, initialize, and configure a plugin
         autorun         Run (and initialize if necessary) a plugin command
         configure       Run plugin configuration (such as authorization and heavyweight setup)
         describe        Display plugin configuration information
@@ -343,7 +341,7 @@ autoinit() {
         init)
             __autoinit_clear
             __autoinit_init \
-                && __autoinit_autoload \
+                && __autoinit_activate \
                 && __autoinit_status
             ;;
 
@@ -355,7 +353,7 @@ autoinit() {
             __autoinit_clear
             source "${BASH_SOURCE[0]}"
             __autoinit_init \
-                && __autoinit_autoload \
+                && __autoinit_activate \
                 && __autoinit_status
             ;;
 
@@ -369,7 +367,7 @@ autoinit() {
 
         install)
             __autoinit_install "${args[@]}"
-            __autoinit_autoload
+            __autoinit_activate
             ;;
 
         exec)
@@ -377,8 +375,8 @@ autoinit() {
             __autoinit_exec $args
             ;;
 
-        autoload)
-            __autoinit_autoload
+        activate)
+            __autoinit_activate
             ;;
 
         autorun)
