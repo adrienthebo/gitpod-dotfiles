@@ -3,24 +3,54 @@
 AUTOINIT_D="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 
 
-__autoinit_tldr_init() {
-    "${AUTOINIT_D}/autoinit-asdf-plugin" "tldr" "init"
-    echo "tldr --update"
+__autoinit_tldr_install() {
+    "${AUTOINIT_D}/autoinit-asdf-plugin" "tldr" "install"
+    if [[ $? -eq 0 ]]; then
+        __autoinit_tldr_configure
+    else
+        __autoinit_warn "Failed to install tldr, cannot automatically configure tldr"
+    fi
 }
 
+__autoinit_tldr_autorun() {
+    local argv="$@"
+    "${AUTOINIT_D}/autoinit-asdf-plugin" "tldr" "autoload"
+    if [[ $? -eq 0 ]]; then
+        __autoinit_tldr_configure
+
+        $argv
+    else
+        __autoinit_warn "Failed to autoload tldr, cannot automatically configure tldr"
+    fi
+}
+
+__autoinit_tldr_configure() {
+    tldr --update
+}
 
 main() {
     local cmd="$1"
+    shift
+    local argv="$@"
     
+    # There are multiple entrypoints that may call plugin installation - and in specific the
+    # `autorun` command will trigger an install. We set this globally to handle this path.
+    # This seems like a code smell.
+    export ASDF_REPOSITORY="https://github.com/adrienthebo/asdf-tealdeer"
+
     case "$cmd" in
-        init)
-            __autoinit_tldr_init
-            ;;
-            
         install)
-            ASDF_REPOSITORY="https://github.com/adrienthebo/asdf-tealdeer" "${AUTOINIT_D}/autoinit-asdf-plugin" "tldr" "install"
+            __autoinit_tldr_install
             ;;
-            
+        
+        autorun)
+            __autoinit_tldr_autorun "$@"
+            ;;
+
+        configure)
+            __autoinit_tldr_configure
+            ;;
+
         *)
             "${AUTOINIT_D}/autoinit-asdf-plugin" "tldr" $@
             ;;
