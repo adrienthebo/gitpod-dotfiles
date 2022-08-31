@@ -255,22 +255,39 @@ HOOKS
             ;;
         "lifecycle")
             cat - <<LIFECYCLE
-# autoinit lifecycles
+# autoinit plugin lifecycles
 
 ## Lifecycle states
 
-- uninstalled
-- installed/inactive
+- absent
+- installed/inactive/ready
 - activated
 - shadowed
 
-## Lifecycle transitions
+## Lifecycle operations
 
-- "install"
-- "activate"
-- "init"
-- "configure"
+    install     Install the plugin binaries onto the system. May not necessarily
+                make the plugin binaries available via \$PATH.
 
+    activate    Make a given plugin's binaries available via \$PATH. Only needed
+                if a plugin can be present on a system without being on the path;
+                installing a package typically services to make that plugin active.
+
+    init        Load shell completions and such. Things that improve quality of life
+                when using a plugin but aren't critical.
+
+                In contrast to activation, which should only happen if the plugin
+                can't be executed, init should happen whenever the shell is launched.
+                An initialization step shouldn't be required to make a plugin 
+                operational; required logic should live in activation.
+
+    configure   Fetch application credentials, update local caches, any sort of
+                heavyweight operation that is necessary to make a plugin operational
+                but shouldn't be run whenever a shell initializes.
+                
+    autoload    Perform all work needed to make a plugin operational. Install the
+                plugin if absent, activate the plugin, run plugin initialization,
+                and finally configure the plugin.
 LIFECYCLE
           ;;
         *)
