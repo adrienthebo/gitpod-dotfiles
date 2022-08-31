@@ -74,7 +74,13 @@ AWSFILE
     if aws sts get-caller-identity 1>/dev/null 2>/dev/null; then
         echo "$(color blue "autoinit-aws: AWS credentials already loaded, run 'aws sso login' to re-authenticate")"
     else
-        BROWSER="/ide/bin/helpers/browser.sh" aws sso login && aws sts get-caller-identity
+        BROWSER="/ide/bin/helpers/browser.sh" aws sso login
+        if [[ $? -ne 0 ]]; then
+            __autoinit_warn "autoinit-aws: SSO login failed - finishing aws configuration early"
+            return 1
+        else
+            aws sts get-caller-identity
+        fi
     fi
 
     if [[ -n $EKS_CLUSTER ]]; then
