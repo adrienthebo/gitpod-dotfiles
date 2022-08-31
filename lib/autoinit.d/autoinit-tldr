@@ -52,7 +52,7 @@ main() {
             ;;
 
         *)
-            "${AUTOINIT_D}/autoinit-asdf-plugin" "tldr" $@
+            "${AUTOINIT_D}/autoinit-asdf-plugin" "tldr" "$cmd" $argv
             ;;
     esac
 }
