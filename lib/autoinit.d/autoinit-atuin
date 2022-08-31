@@ -67,6 +67,10 @@ __autoinit_atuin_autoload() {
     if ! __autoinit_atuin_is_active ; then
         eval "$(__autoinit_atuin_init)"
     fi
+
+    if [[ -n $AUTOINIT_ATUIN_AUTOCONFIGURE ]]; then
+        __autoinit_atuin_configure
+    fi
 }
 
 __autoinit_atuin_autorun() {
