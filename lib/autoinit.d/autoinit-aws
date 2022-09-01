@@ -3,6 +3,7 @@
 AUTOINIT_D="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 __LIBDIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")"
 source "${__LIBDIR}/colors.sh"
+source "${__LIBDIR}/autoinit.sh"
 
 
 __autoinit_aws_init() {
@@ -28,21 +29,20 @@ __autoinit_aws_configure() {
     aws_vars=(AWS_SSO_URL AWS_SSO_REGION AWS_ACCOUNT_ID AWS_ROLE_NAME AWS_REGION)
 
     for aws_var in "${aws_vars[@]}"; do
-      echo "$(color blue "autoinit-aws: $aws_var is ${!aws_var}")"
         if [[ -z "${!aws_var}" ]]; then
-            echo "Error: AWS variable \"$aws_var\" is unset"
+            __autoinit_warn "Error: AWS variable \"$aws_var\" is unset"
             local aws_var_unset=true
         fi
     done
 
     if ! [[ -z "$aws_var_unset" ]]; then
         local script=$(realpath "$0")
-        echo "AWS Variables are not set, skipping autoconfig of files"
-        echo "Re-run ${script} when AWS_ variables are set"
+        __autoinit_warn "AWS Variables are not set, skipping autoconfig of files."
+        __autoinit_warn "Re-run ${script} when AWS_ variables are set"
         return 1
     fi
 
-    echo "$(color blue "autoinit-aws: Forcing AWS config to just use SSO credentials")"
+    __autoinit_debug "$(color blue "autoinit-aws: Forcing AWS config to just use SSO credentials")"
     [[ -d /home/gitpod/.aws ]] || mkdir /home/gitpod/.aws
     cat <<- AWSFILE > /home/gitpod/.aws/config
 [default]
@@ -62,7 +62,7 @@ AWSFILE
         echo '{}' > /home/gitpod/.docker/config.json
     fi
 
-    echo "$(color blue "autoinit-aws: Ensuring Docker Config uses ecr-login for ECR repositories")"
+    __autoinit_debug "autoinit-aws: Ensuring Docker Config uses ecr-login for ECR repositories"
 
     cp /home/gitpod/.docker/config.json /home/gitpod/.docker/config_bak.json
     jq '.credHelpers["public.ecr.aws"]="ecr-login"' /home/gitpod/.docker/config.json > /home/gitpod/.docker/config_tmp.json
