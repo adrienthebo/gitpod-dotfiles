@@ -14,17 +14,34 @@ __autoinit_tldr_install() {
 
 __autoinit_tldr_autorun() {
     local argv="$@"
-    "${AUTOINIT_D}/autoinit-asdf-plugin" "tldr" "autoload"
-    if [[ $? -eq 0 ]]; then
+    
+    
+    if ! "${AUTOINIT_D}/autoinit-asdf-plugin" "tldr" is-installed; then
+        "${AUTOINIT_D}/autoinit-asdf-plugin" "tldr" "autoload"
+        eval "$(__autoinit_tldr_init)"
         __autoinit_tldr_configure
-
-        $argv
     else
-        __autoinit_warn "Failed to autoload tldr, cannot automatically configure tldr"
+        "${AUTOINIT_D}/autoinit-asdf-plugin" "tldr" "autoload"
+        eval "$(__autoinit_tldr_init)"
     fi
+
+    $argv
 }
 
 __autoinit_tldr_configure() {
+    case "$(uname)" in
+        Darwin)
+            readonly _STAT_MODIFIED_FMT="-f %m"
+            ;;
+
+        Linux)
+            readonly _STAT_MODIFIED_FMT="--format %Y"
+            ;;
+        *)
+            echo "Error: unknown platform $(uname), cannot determine file stat format" 1>&2
+            exit
+            ;;
+    esac
     tldr --update
 }
 
