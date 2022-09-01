@@ -158,6 +158,7 @@ __autoinit_init() {
     __autoinit_register "aws"          "${__AUTOINIT_DIR}/autoinit-aws"
     __autoinit_register "bat"          "${__AUTOINIT_DIR}/autoinit-bat"
     __autoinit_register "cmctl"        "${__AUTOINIT_DIR}/autoinit-cmctl"
+    __autoinit_register "direnv"       "${__AUTOINIT_DIR}/autoinit-direnv"
     __autoinit_register "eksctl"       "${__AUTOINIT_DIR}/autoinit-eksctl"
     __autoinit_register "fzf"          "${__AUTOINIT_DIR}/autoinit-fzf"
     __autoinit_register "gcloud"       "${__AUTOINIT_DIR}/autoinit-gcloud"
