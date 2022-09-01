@@ -79,9 +79,12 @@ __autoinit_alias_fn() {
 
 __autoinit_register() {
     local plugin="$1"
-    __autoinit_debug "autoinit-register: registering '${plugin}'"
+    local handler="$2"
+    __autoinit_debug "autoinit-register: registering '${plugin}' with handler '${handler}'"
 
     __autoinit_plugins+=("$plugin")
+    __autoinit_command_handlers[$plugin]="$handler"
+
     __autoinit_unloaded_plugins+=("$plugin")
     __autoinit_debug "autoinit-register: registered plugins='${__autoinit_plugins[@]}', unloaded='${__autoinit_unloaded_plugins[@]}'"
 }
@@ -145,23 +148,24 @@ __autoinit_init() {
     echo "autoinit: enabling shell hooks"
 
     declare -ag __autoinit_plugins
+    declare -Ag __autoinit_command_handlers
     declare -ag __autoinit_unloaded_plugins
 
     __autoinit_alias_fn "__autoinit_handle" "command_not_found_handle"
 
-    __autoinit_register "asdf"
-    __autoinit_register "atuin"
-    __autoinit_register "aws"
-    __autoinit_register "bat"
-    __autoinit_register "cmctl"
-    __autoinit_register "eksctl"
-    __autoinit_register "fzf"
-    __autoinit_register "gcloud"
-    __autoinit_register "helm"
-    __autoinit_register "kubectl"
-    __autoinit_register "kubectl-kots"
-    __autoinit_register "kubectl-krew"
-    __autoinit_register "tldr"
+    __autoinit_register "asdf"         "${__AUTOINIT_DIR}/autoinit-asdf"
+    __autoinit_register "atuin"        "${__AUTOINIT_DIR}/autoinit-atuin"
+    __autoinit_register "aws"          "${__AUTOINIT_DIR}/autoinit-aws"
+    __autoinit_register "bat"          "${__AUTOINIT_DIR}/autoinit-bat"
+    __autoinit_register "cmctl"        "${__AUTOINIT_DIR}/autoinit-cmctl"
+    __autoinit_register "eksctl"       "${__AUTOINIT_DIR}/autoinit-eksctl"
+    __autoinit_register "fzf"          "${__AUTOINIT_DIR}/autoinit-fzf"
+    __autoinit_register "gcloud"       "${__AUTOINIT_DIR}/autoinit-gcloud"
+    __autoinit_register "helm"         "${__AUTOINIT_DIR}/autoinit-helm"
+    __autoinit_register "kubectl"      "${__AUTOINIT_DIR}/autoinit-kubectl"
+    __autoinit_register "kubectl-kots" "${__AUTOINIT_DIR}/autoinit-kubectl-kots"
+    __autoinit_register "kubectl-krew" "${__AUTOINIT_DIR}/autoinit-kubectl-krew"
+    __autoinit_register "tldr"         "${__AUTOINIT_DIR}/autoinit-tldr"
 }
 
 
@@ -228,6 +232,7 @@ __autoinit_unload() {
 
 __autoinit_clear() {
     unset __autoinit_plugins
+    unset __autoinit_command_handlers
     unset __autoinit_unloaded_plugins
     unset command_not_found_handle
 }
