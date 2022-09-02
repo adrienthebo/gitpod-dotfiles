@@ -29,6 +29,7 @@ Environment variables:
         - General SDK Configuration:
             - AZURE_SUBSCRIPTION_ID="${AZURE_SUBSCRIPTION_ID}"
             - AZURE_RESOURCE_GROUP="${AZURE_RESOURCE_GROUP}"
+            - AZURE_CONFIG_DIR="${AZURE_CONFIG_DIR}"
         - Identity:
             - AZURE_CLIENT_ID="${AZURE_CLIENT_ID}"
             - AZURE_CLIENT_SECRET="${AZURE_CLIENT_SECRET}"
