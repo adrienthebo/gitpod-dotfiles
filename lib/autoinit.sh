@@ -201,6 +201,22 @@ __autoinit_exec() {
     "${__AUTOINIT_DIR}/autoinit-$plugin" $@
 }
 
+__autoinit_edit() {
+    local plugin="$1"
+
+    if [[ -z $plugin ]]; then
+        echo "usage: autoinit _edit PLUGIN" 1>&2
+        return 1
+    fi
+    
+    if [[ -z $EDITOR ]]; then
+        __autoinit_error "\$EDITOR is unset, cannot edit '${__AUTOINIT_DIR}/autoinit-$plugin'"
+        return 1
+    fi
+
+    $EDITOR "${__AUTOINIT_DIR}/autoinit-$plugin"
+}
+
 
 __autoinit_configure() {
     local plugin="$1"
@@ -380,6 +396,10 @@ autoinit() {
         exec)
             # shellcheck disable=SC2086
             __autoinit_exec $args
+            ;;
+
+        _edit)
+            __autoinit_edit "${args[0]}"
             ;;
 
         activate)
