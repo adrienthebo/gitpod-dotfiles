@@ -13,7 +13,22 @@ __autoinit_az_init() {
 
 
 __autoinit_az_configure() {
-    __autoinit_error "autoinit-az/configure: not implemented"
+    declare -a azure_sp_vars=(AZURE_CLIENT_ID AZURE_CLIENT_SECRET AZURE_TENANT_ID)
+    local missing_sp_vars=false
+
+    for v in "${azure_sp_vars[@]}"; do
+        if [[ -z "${!v}" ]]; then
+            __autoinit_warn "autoinit-az/configure: missing Azure service principal variable '$v'"
+            missing_sp_vars=true
+        fi
+    done
+
+    if [[ $missing_sp_vars = true ]]; then
+        __autoinit_error "autoinit-az/configure: one or more Azure service principal variables are absent. Set those variables and re-run configuration."
+        return 1
+    else
+        az login --service-principal -u "$AZURE_CLIENT_ID" -p "$AZURE_CLIENT_SECRET" --tenant "$AZURE_TENANT_ID"
+    fi
 }
 
 
