@@ -25,8 +25,23 @@ __autoinit_az_describe() {
 > More information: <https://docs.microsoft.com/en-us/cli/azure/get-started-with-azure-cli?view=azure-cli-latest>.
 
 Environment variables:
-    - API access (used with 'az sso login'):
-        - AZURE_SUBSCRIPTION_ID="${AZURE_SUBSCRIPTION_ID}"
+    - SDK:
+        - General SDK Configuration:
+            - AZURE_SUBSCRIPTION_ID="${AZURE_SUBSCRIPTION_ID}"
+            - AZURE_RESOURCE_GROUP="${AZURE_RESOURCE_GROUP}"
+        - Identity:
+            - AZURE_CLIENT_ID="${AZURE_CLIENT_ID}"
+            - AZURE_CLIENT_SECRET="${AZURE_CLIENT_SECRET}"
+            - AZURE_TENANT_ID="${AZURE_TENANT_ID}"
+        - Terraform:
+            - ARM_SUBSCRIPTION_ID="${ARM_SUBSCRIPTION_ID}"
+            - ARM_TENANT_ID="${ARM_TENANT_ID}"
+            - ARM_CLIENT_ID="${ARM_CLIENT_ID}"
+            - ARM_CLIENT_SECRET="${ARM_CLIENT_SECRET}"
+    
+Documentation:
+    - [Azure SDK environment variables](https://github.com/Azure/azure-sdk/blob/main/_includes/tables/environment_variables.md)
+    - [Azure Terraform provider variables](https://docs.microsoft.com/en-us/azure/developer/terraform/authenticate-to-azure?tabs=bash)
 EOD
 }
 
