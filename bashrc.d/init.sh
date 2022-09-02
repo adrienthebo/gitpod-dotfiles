@@ -5,6 +5,10 @@ source "$HOME/.dotfiles/lib/functions.sh"
 if [[ -f "$HOME/.dotfiles/lib/autoinit.sh" ]]; then
     source "$HOME/.dotfiles/lib/autoinit.sh"
     autoinit init
+    
+    if autoinit exec atuin is-installed; then
+        autoinit init-plugin atuin
+    fi
 fi
 
 pathmunge "$HOME/.local/bin" after
