@@ -1,0 +1,157 @@
+#!/usr/bin/env bash
+
+__LIBDIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")"
+source "${__LIBDIR}/colors.sh"
+source "${__LIBDIR}/functions.sh"
+source "${__LIBDIR}/autoinit.sh"
+
+__autoinit_jiq_init() {
+    # shellcheck disable=SC2016
+    cat - <<EOD
+if [[ -d "\$HOME/.local/bin" ]]; then
+    if ! [[ \$PATH =~ "\$HOME/.local/bin" ]]; then
+        export \$PATH="\$PATH:\$HOME/.local/bin"
+    fi
+fi
+EOD
+}
+
+
+__autoinit_jiq_install() {
+    [[ -d "$HOME/.local/bin" ]] || mkdir -p "$HOME/.local/bin"
+
+    tmpdir="$(mktemp -d)"
+    
+    (
+        set -e
+        cd "$tmpdir"
+        curl -L https://github.com/fiatjaf/jiq/releases/download/v0.7.2/jiq_linux_amd64 -o ./jiq
+        
+        chmod +x ./jiq
+        mv ./jiq "$HOME/.local/bin"
+    )
+
+    if [[ $? -eq 0 ]]; then
+        eval "$(__autoinit_jiq_init)"
+    fi
+    
+    if [[ -d "$tmpdir" ]]; then
+        rm -rf "$tmpdir"
+    fi
+}
+
+
+__autoinit_jiq_is_active() {
+    command -v jiq 1>/dev/null
+    return $?
+}
+
+
+__autoinit_jiq_is_installed() {
+    [[ -f "$HOME/.local/bin/jiq" ]]
+    return $?
+}
+
+
+__autoinit_jiq_is_ready() {
+    if __autoinit_jiq_is_installed && ! __autoinit_jiq_is_active && ! command -v gcloud 1>/dev/null; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+
+__autoinit_jiq_is_shadowed() {
+    command -v jiq 1>/dev/null && [[ "$(which jiq)" != "$HOME/.local/bin/jiq" ]]
+}
+
+
+__autoinit_jiq_autoload() {
+    if ! __autoinit_jiq_is_installed ; then
+        __autoinit_jiq_install
+        rc=$?
+        if [[ $rc -ne 0 ]]; then
+            return $rc
+        fi
+    fi
+
+    if ! __autoinit_jiq_is_active ; then
+        echo eval "$(__autoinit_jiq_init)"
+        eval "$(__autoinit_jiq_init)"
+    fi
+}
+
+__autoinit_jiq_autorun() {
+    ARGV="$@"
+
+    __autoinit_jiq_autoload || return 254
+
+    $ARGV
+    return $?
+}
+
+
+__autoinit_jiq_describe() {
+
+    cat - <<EOD
+# jiq
+
+> Interactive JSON query explorer.
+> More information: <https://github.com/fiatjaf/jiq>.
+EOD
+}
+
+main() {
+    ARG="$1"
+    shift
+    case "$ARG" in
+        "init")
+            __autoinit_jiq_init
+            ;;
+
+        "install")
+            __autoinit_jiq_install
+            ;;
+
+        "is-active")
+            __autoinit_jiq_is_active
+            ;;
+
+        "is-installed")
+            __autoinit_jiq_is_installed
+            ;;
+
+        "is-ready")
+            __autoinit_jiq_is_ready
+            ;;
+
+        "is-shadowed")
+            __autoinit_jiq_is_shadowed
+            ;;
+
+        "autoload")
+            __autoinit_jiq_autoload
+            ;;
+
+        "autorun")
+            __autoinit_jiq_autorun "$@"
+            exit $?
+            ;;
+
+        "describe")
+            __autoinit_jiq_describe
+            ;;
+
+        *)
+            echo "Usage: $0 [init|install|is-active|is-installed]" 1>&2
+            ;;
+    esac
+
+}
+
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    # shellcheck disable=SC2068
+    main $@
+fi

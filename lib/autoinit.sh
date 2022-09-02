@@ -163,6 +163,7 @@ __autoinit_init() {
     __autoinit_register "fzf"          "${__AUTOINIT_DIR}/autoinit-fzf"
     __autoinit_register "gcloud"       "${__AUTOINIT_DIR}/autoinit-gcloud"
     __autoinit_register "helm"         "${__AUTOINIT_DIR}/autoinit-helm"
+    __autoinit_register "jiq"          "${__AUTOINIT_DIR}/autoinit-jiq"
     __autoinit_register "kubectl"      "${__AUTOINIT_DIR}/autoinit-kubectl"
     __autoinit_register "kubectl-kots" "${__AUTOINIT_DIR}/autoinit-kubectl-kots"
     __autoinit_register "kubectl-krew" "${__AUTOINIT_DIR}/autoinit-kubectl-krew"
