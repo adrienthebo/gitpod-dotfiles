@@ -9,6 +9,10 @@ if [[ -f "$HOME/.dotfiles/lib/autoinit.sh" ]]; then
     if autoinit exec atuin is-installed; then
         autoinit init-plugin atuin
     fi
+    
+    if autoinit exec direnv is-installed; then
+        autoinit init-plugin direnv
+    fi
 fi
 
 pathmunge "$HOME/.local/bin" after
