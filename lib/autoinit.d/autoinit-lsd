@@ -1,0 +1,165 @@
+#!/usr/bin/env bash
+
+__LIBDIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")"
+source "${__LIBDIR}/colors.sh"
+source "${__LIBDIR}/functions.sh"
+source "${__LIBDIR}/autoinit.sh"
+
+__autoinit_lsd_init() {
+    # shellcheck disable=SC2016
+    cat - <<EOD
+if [[ -d "\$HOME/.local/bin" ]]; then
+    if ! [[ \$PATH =~ "\$HOME/.local/bin" ]]; then
+        export \$PATH="\$PATH:\$HOME/.local/bin"
+    fi
+fi
+
+source "$HOME/.local/share/lsd/autocomplete/lsd.bash-completion"
+alias l="lsd"
+alias ls="lsd -l"
+
+EOD
+}
+
+
+__autoinit_lsd_install() {
+    [[ -d "$HOME/.local/bin" ]] || mkdir -p "$HOME/.local/bin"
+
+    tmpdir="$(mktemp -d)"
+    
+    local lsd_version="0.22.0"
+    (
+        set -e
+        cd "$tmpdir"
+        curl -LO https://github.com/Peltoche/lsd/releases/download/$lsd_version/lsd-${lsd_version}-x86_64-unknown-linux-musl.tar.gz
+        tar -xf lsd-${lsd_version}-x86_64-unknown-linux-musl.tar.gz
+        
+        mkdir -p "$HOME/.local/share/lsd/"
+        cp -r "lsd-${lsd_version}-x86_64-unknown-linux-musl/autocomplete" "$HOME/.local/share/lsd/autocomplete"
+        cp "lsd-${lsd_version}-x86_64-unknown-linux-musl/lsd" "$HOME/.local/bin/lsd"
+    )
+
+    if [[ $? -eq 0 ]]; then
+        eval "$(__autoinit_lsd_init)"
+    fi
+    
+    if [[ -d "$tmpdir" ]]; then
+        rm -rf "$tmpdir"
+    fi
+}
+
+
+__autoinit_lsd_is_active() {
+    command -v lsd 1>/dev/null
+    return $?
+}
+
+
+__autoinit_lsd_is_installed() {
+    [[ -f "$HOME/.local/bin/lsd" ]]
+    return $?
+}
+
+
+__autoinit_lsd_is_ready() {
+    if __autoinit_lsd_is_installed && ! __autoinit_lsd_is_active && ! command -v gcloud 1>/dev/null; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+
+__autoinit_lsd_is_shadowed() {
+    command -v lsd 1>/dev/null && [[ "$(which lsd)" != "$HOME/.local/bin/lsd" ]]
+}
+
+
+__autoinit_lsd_autoload() {
+    if ! __autoinit_lsd_is_installed ; then
+        __autoinit_lsd_install
+        rc=$?
+        if [[ $rc -ne 0 ]]; then
+            return $rc
+        fi
+    fi
+
+    if ! __autoinit_lsd_is_active ; then
+        echo eval "$(__autoinit_lsd_init)"
+        eval "$(__autoinit_lsd_init)"
+    fi
+}
+
+__autoinit_lsd_autorun() {
+    ARGV="$@"
+
+    __autoinit_lsd_autoload || return 254
+
+    $ARGV
+    return $?
+}
+
+
+__autoinit_lsd_describe() {
+
+    cat - <<EOD
+# lsd
+
+> Interactive JSON query explorer.
+> More information: <https://github.com/fiatjaf/lsd>.
+EOD
+}
+
+main() {
+    ARG="$1"
+    shift
+    case "$ARG" in
+        "init")
+            __autoinit_lsd_init
+            ;;
+
+        "install")
+            __autoinit_lsd_install
+            ;;
+
+        "is-active")
+            __autoinit_lsd_is_active
+            ;;
+
+        "is-installed")
+            __autoinit_lsd_is_installed
+            ;;
+
+        "is-ready")
+            __autoinit_lsd_is_ready
+            ;;
+
+        "is-shadowed")
+            __autoinit_lsd_is_shadowed
+            ;;
+
+        "autoload")
+            __autoinit_lsd_autoload
+            ;;
+
+        "autorun")
+            __autoinit_lsd_autorun "$@"
+            exit $?
+            ;;
+
+        "describe")
+            __autoinit_lsd_describe
+            ;;
+
+        *)
+            echo "Usage: $0 [init|install|is-active|is-installed]" 1>&2
+            ;;
+    esac
+
+}
+
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    # shellcheck disable=SC2068
+    main $@
+fi
