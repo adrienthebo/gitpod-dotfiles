@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+AUTOINIT_D="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
+__LIBDIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")"
+source "${__LIBDIR}/colors.sh"
+source "${__LIBDIR}/autoinit.sh"
+
+
+__autoinit_az_init() {
+    __autoinit_error "autoinit-az/init: not implemented"
+    return 1
+}
+
+
+__autoinit_az_configure() {
+    __autoinit_error "autoinit-az/configure: not implemented"
+}
+
+
+__autoinit_az_describe() {
+    cat - <<EOD
+# autoinit-az
+
+> Install and configure the Azure CLI.
+> More information: <https://docs.microsoft.com/en-us/cli/azure/get-started-with-azure-cli?view=azure-cli-latest>.
+
+Environment variables:
+    - API access (used with 'az sso login'):
+        - AZURE_SUBSCRIPTION_ID="${AZURE_SUBSCRIPTION_ID}"
+EOD
+}
+
+
+main() {
+    local cmd="$1"
+
+    case "$cmd" in
+        init)
+            __autoinit_az_init
+            ;;
+
+        configure)
+            __autoinit_az_configure
+            ;;
+
+        describe)
+            __autoinit_az_describe
+            ;;
+
+        *)
+            __autoinit_error "autoinit-az/${cmd}: not implemented"
+            return 1
+            ;;
+    esac
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    # shellcheck disable=SC2068
+    main $@
+fi
