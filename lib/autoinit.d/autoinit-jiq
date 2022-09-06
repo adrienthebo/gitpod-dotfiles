@@ -63,7 +63,13 @@ __autoinit_jiq_is_ready() {
 
 
 __autoinit_jiq_is_shadowed() {
-    command -v jiq 1>/dev/null && [[ "$(which jiq)" != "$HOME/.local/bin/jiq" ]]
+    if ! command -v jiq 1>/dev/null; then
+        return 0
+    elif [[ "$(which jiq)" == "$HOME/.local/bin/jiq" ]]; then
+        return 0
+    else
+        return 1
+    fi
 }
 
 
