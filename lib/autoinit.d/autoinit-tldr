@@ -3,6 +3,11 @@
 AUTOINIT_D="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 
 
+__autoinit_tldr_init() {
+    "${AUTOINIT_D}/autoinit-asdf-plugin" "tldr" "init"
+}
+
+
 __autoinit_tldr_install() {
     "${AUTOINIT_D}/autoinit-asdf-plugin" "tldr" "install"
     if [[ $? -eq 0 ]]; then
