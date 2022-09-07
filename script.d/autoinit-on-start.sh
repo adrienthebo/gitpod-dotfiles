@@ -6,11 +6,11 @@ source "$__LIBDIR/autoinit.sh"
 
 autoinit init
 
-# TODO: `autoinit exec` is an internal tool; replace the dev call with something smarter
-if ! autoinit exec direnv is-installed; then
-    autoinit install direnv
-fi
+declare -a autoinit_plugins=(direnv atuin lsd)
 
-if ! autoinit exec atuin is-installed; then
-    autoinit install atuin
-fi
+for plugin in "${autoinit_plugins[@]}"; do
+    # TODO: `autoinit exec` is an internal tool; replace the dev call with something smarter
+    if ! autoinit exec "$plugin" is-installed; then
+        autoinit install "$plugin"
+    fi
+done

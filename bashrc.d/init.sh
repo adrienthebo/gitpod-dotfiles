@@ -6,19 +6,17 @@ if [[ -f "$HOME/.dotfiles/lib/autoinit.sh" ]]; then
     source "$HOME/.dotfiles/lib/autoinit.sh"
     autoinit init
     
-    if autoinit exec atuin is-installed; then
-        autoinit init-plugin atuin
-    fi
-    
-    if autoinit exec direnv is-installed; then
-        autoinit init-plugin direnv
-    fi
+    declare -a autoinit_plugins=(direnv atuin lsd)
+
+    for plugin in "${autoinit_plugins[@]}"; do
+        # TODO: `autoinit exec` is an internal tool; replace the dev call with something smarter
+            autoinit init-plugin "$plugin"
+        fi
+    done
 fi
 
 pathmunge "$HOME/.local/bin" after
 pathmunge "$HOME/.krew/bin" after
-
-[[ -f $HOME/.asdf/asdf.sh ]] && source $HOME/.asdf/asdf.sh
 
 alias k="kubectl"
 alias tf="terraform"
