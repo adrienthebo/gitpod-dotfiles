@@ -10,8 +10,7 @@ if [[ -f "$HOME/.dotfiles/lib/autoinit.sh" ]]; then
 
     for plugin in "${autoinit_plugins[@]}"; do
         # TODO: `autoinit exec` is an internal tool; replace the dev call with something smarter
-            autoinit init-plugin "$plugin"
-        fi
+        autoinit init-plugin "$plugin"
     done
 fi
 
