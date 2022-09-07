@@ -16,12 +16,11 @@ EOD
 __gcloud_install() {
     asdf plugin add gcloud
 
-    asdf install gcloud latest
+    asdf install gcloud latest || return 1
 
     local latest="$(asdf list gcloud | tail -n1 | tr -d '[:space:]')"
 
     asdf global gcloud "$latest"
-
     asdf exec gcloud components install gke-gcloud-auth-plugin --quiet
 
     if ! command -v kubectl 1>/dev/null; then
