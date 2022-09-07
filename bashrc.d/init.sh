@@ -17,3 +17,5 @@ fi
 
 alias k="kubectl"
 alias tf="terraform"
+
+export LESS="-iSQR"
