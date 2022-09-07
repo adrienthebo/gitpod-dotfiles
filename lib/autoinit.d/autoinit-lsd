@@ -71,7 +71,13 @@ __autoinit_lsd_is_ready() {
 
 
 __autoinit_lsd_is_shadowed() {
-    command -v lsd 1>/dev/null && [[ "$(which lsd)" != "$HOME/.local/bin/lsd" ]]
+    if ! command -v lsd 1>/dev/null; then
+        return 0
+    elif [[ "$(which lsd)" == "$HOME/.local/bin/lsd" ]]; then
+        return 0
+    else
+        return 1
+    fi
 }
 
 
