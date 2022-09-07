@@ -15,6 +15,9 @@ __autoinit_az_init() {
 __autoinit_az_configure() {
     declare -a azure_sp_vars=(AZURE_CLIENT_ID AZURE_CLIENT_SECRET AZURE_TENANT_ID)
     local missing_sp_vars=false
+    
+    az config set core.collect_telemetry=no
+    az config set core.output=table
 
     for v in "${azure_sp_vars[@]}"; do
         if [[ -z "${!v}" ]]; then
@@ -49,11 +52,11 @@ Environment variables:
             - AZURE_CLIENT_ID="${AZURE_CLIENT_ID}"
             - AZURE_CLIENT_SECRET="${AZURE_CLIENT_SECRET}"
             - AZURE_TENANT_ID="${AZURE_TENANT_ID}"
-        - Terraform:
-            - ARM_SUBSCRIPTION_ID="${ARM_SUBSCRIPTION_ID}"
-            - ARM_TENANT_ID="${ARM_TENANT_ID}"
-            - ARM_CLIENT_ID="${ARM_CLIENT_ID}"
-            - ARM_CLIENT_SECRET="${ARM_CLIENT_SECRET}"
+    - Terraform:
+        - ARM_SUBSCRIPTION_ID="${ARM_SUBSCRIPTION_ID}"
+        - ARM_TENANT_ID="${ARM_TENANT_ID}"
+        - ARM_CLIENT_ID="${ARM_CLIENT_ID}"
+        - ARM_CLIENT_SECRET="${ARM_CLIENT_SECRET}"
     
 Documentation:
     - [Azure SDK environment variables](https://github.com/Azure/azure-sdk/blob/main/_includes/tables/environment_variables.md)
