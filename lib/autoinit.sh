@@ -56,10 +56,21 @@ __autoinit_handle() {
 __autoinit_install() {
     local plugin plugins
     plugins=($1)
+
+    declare -a failed_plugins=()
     for plugin in "${plugins[@]}"; do
-      "$__AUTOINIT_DIR/autoinit-$plugin" install
-      __autoinit_activate_plugin "$plugin"
+        "$__AUTOINIT_DIR/autoinit-$plugin" install
+        if [[ $? -ne 0 ]]; then
+            failed_plugins+=("$plugin")
+        else
+            __autoinit_activate_plugin "$plugin"
+        fi
     done
+    
+    if [[ ${#failed_plugins[@]} -ne 0 ]]; then
+        __autoinit_error "Failed to install the following plugins: '${failed_plugins}'"
+        return 1
+    fi
 }
 
 
