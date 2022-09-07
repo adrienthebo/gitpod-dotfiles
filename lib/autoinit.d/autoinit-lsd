@@ -17,7 +17,7 @@ fi
 source "$HOME/.local/share/lsd/autocomplete/lsd.bash-completion"
 alias l="lsd"
 alias ls="lsd -l"
-
+alias ll="lsd -lat"
 EOD
 }
 

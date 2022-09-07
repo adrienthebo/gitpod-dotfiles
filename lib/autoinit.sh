@@ -167,6 +167,7 @@ __autoinit_init() {
     __autoinit_register "kubectl"      "${__AUTOINIT_DIR}/autoinit-kubectl"
     __autoinit_register "kubectl-kots" "${__AUTOINIT_DIR}/autoinit-kubectl-kots"
     __autoinit_register "kubectl-krew" "${__AUTOINIT_DIR}/autoinit-kubectl-krew"
+    __autoinit_register "lsd"          "${__AUTOINIT_DIR}/autoinit-lsd"
     __autoinit_register "tldr"         "${__AUTOINIT_DIR}/autoinit-tldr"
 }
 
