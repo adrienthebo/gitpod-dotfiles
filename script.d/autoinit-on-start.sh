@@ -13,4 +13,9 @@ for plugin in "${autoinit_plugins[@]}"; do
     if ! autoinit exec "$plugin" is-installed; then
         autoinit install "$plugin"
     fi
+    autoinit init-plugin "$plugin"
+done
+
+for plugin in atuin; do
+    autoinit configure "$plugin"
 done
