@@ -1,14 +1,22 @@
 #!/usr/bin/env bash
 
-readonly __LIBDIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")"
+__LIBDIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")"
 source "${__LIBDIR}/colors.sh"
 source "${__LIBDIR}/functions.sh"
+source "${__LIBDIR}/autoinit.sh"
 
 __gcloud_init() {
-    local latest="$(asdf list gcloud | tail -n1 | tr -d '[:space:]')"
     cat - <<EOD
-asdf reshim gcloud "$latest"
-source "$(gcloud info --format='get(config.paths.sdk_root)')/completion.$(basename "$SHELL").inc"
+
+if command -v asdf 1>/dev/null && asdf which gcloud 1>/dev/null 2>/dev/null; then
+    local latest="$(asdf list gcloud | tail -n1 | tr -d '[:space:]')"
+    asdf reshim gcloud "$latest"
+    unset latest
+fi
+
+if command -v gcloud 1>/dev/null; then
+    source "$(gcloud info --format='get(config.paths.sdk_root)')/completion.$(basename "$SHELL").inc"
+fi
 EOD
 }
 
@@ -16,7 +24,11 @@ EOD
 __gcloud_install() {
     asdf plugin add gcloud
 
-    asdf install gcloud latest || return 1
+    asdf install gcloud latest
+    if [[ $? -ne 0 ]]; then
+        __autoinit_error "autoinit-gcloud: gcloud installation failed, terminating installation"
+        return 1
+    fi
 
     local latest="$(asdf list gcloud | tail -n1 | tr -d '[:space:]')"
 
