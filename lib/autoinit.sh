@@ -145,7 +145,7 @@ __autoinit_status() {
 }
 
 __autoinit_init() {
-    echo "autoinit: enabling shell hooks"
+    echo "$(color cyan bold "autoinit: enabling shell hooks")"
 
     declare -ag __autoinit_plugins
     declare -Ag __autoinit_command_handlers
@@ -209,7 +209,7 @@ __autoinit_edit() {
         echo "usage: autoinit _edit PLUGIN" 1>&2
         return 1
     fi
-    
+
     if [[ -z $EDITOR ]]; then
         __autoinit_error "\$EDITOR is unset, cannot edit '${__AUTOINIT_DIR}/autoinit-$plugin'"
         return 1
@@ -262,15 +262,28 @@ __autoinit_topic() {
 
     case "$topic" in
         "")
-            echo "Available topics: [hooks|lifecycle]"
+            echo "Available topics: [hooks|lifecycle|plugin-api]"
             ;;
 
         "hooks")
             cat - <<HOOKS
 # autoinit hooks
 
-todo: document 'command_not_found_handle'
-todo: document binstubs
+## command-not-found
+
+## binstubs
+
+> This hook method is _unimplemented_; the following documentation describes the
+> desired behavior. Stay tuned!
+
+The binstubs hook uses stub executables to automatically install the requested
+executable.
+
+binstub hooks are needed when calling commands that execute subcommands, such as
+kubectl or git. Because the command-not-found hook only catches command invocations
+that fail in the shell, other tools that probe \$PATH must be able to locate a shim
+executable that will trigger autoinit's installation logic.
+
 
 HOOKS
             ;;
@@ -299,18 +312,50 @@ HOOKS
 
                 In contrast to activation, which should only happen if the plugin
                 can't be executed, init should happen whenever the shell is launched.
-                An initialization step shouldn't be required to make a plugin 
+                An initialization step shouldn't be required to make a plugin
                 operational; required logic should live in activation.
 
     configure   Fetch application credentials, update local caches, any sort of
                 heavyweight operation that is necessary to make a plugin operational
                 but shouldn't be run whenever a shell initializes.
-                
+
     autoload    Perform all work needed to make a plugin operational. Install the
                 plugin if absent, activate the plugin, run plugin initialization,
                 and finally configure the plugin.
 LIFECYCLE
-          ;;
+            ;;
+
+        "plugin-api")
+            cat - <<PLUGINAPI
+# plugin API
+
+## Status commands
+
+- `is-installed`    TODO
+- `is-active`       TODO
+- `is-ready`        TODO
+- `is-shadowed`     TODO
+- `status`          **EXPERIMENTAL** Return a JSON object representing the plugin status
+
+###
+
+- `install`
+- `activate`
+- `init`            Called upon shell startup
+- `completion`      **EXPERIMENTAL** Called upon shell startup
+- `configure`       Called upon workspace creation (or credential refresh)
+
+### Informational
+
+- `describe`
+
+### TBD
+
+- `autoload`
+- `autorun`
+
+PLUGINAPI
+            ;;
         *)
           __autoinit_error "Unknown topic '$topic'"
           return 1
@@ -349,6 +394,7 @@ EOD
 
     Developer commands:
         exec            Run an autoinit plugin subcommand
+        _edit           Edit an autoinit plugin implementation
 
     Other commands:
         help            Show this help
@@ -418,7 +464,7 @@ autoinit() {
         describe)
             __autoinit_describe "${args[0]}"
             ;;
-            
+
         topic)
             __autoinit_topic "${args[0]}"
             ;;
