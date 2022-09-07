@@ -341,7 +341,10 @@ LIFECYCLE
 
 - `install`
 - `activate`
-- `init`            Called upon shell startup
+- `init`            Called upon shell startup. Configures the shell plugin.
+                    **Note:** A plugin can be initialized without being installed; this
+                    allows a plugin to work with a both autoinit-installed plugin as
+                    well as a plugin present on the system itself.
 - `completion`      **EXPERIMENTAL** Called upon shell startup
 - `configure`       Called upon workspace creation (or credential refresh)
 
