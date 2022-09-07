@@ -15,12 +15,5 @@ if [[ -f "$HOME/.dotfiles/lib/autoinit.sh" ]]; then
     done
 fi
 
-pathmunge "$HOME/.local/bin" after
-pathmunge "$HOME/.krew/bin" after
-
 alias k="kubectl"
 alias tf="terraform"
-
-if command -v direnv 1>/dev/null; then
-    eval "$(direnv hook "$(basename "$SHELL")")"
-fi
