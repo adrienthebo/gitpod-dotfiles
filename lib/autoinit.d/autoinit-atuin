@@ -18,7 +18,7 @@ EOD
 __autoinit_atuin_install() {
     bash <(curl https://raw.githubusercontent.com/ellie/atuin/main/install.sh)
 
-    
+
     if [[ $(basename "$SHELL") == "bash" ]]; then
         if ! [[ -f $HOME/.bash-preexec.sh ]]; then
             curl https://raw.githubusercontent.com/rcaloras/bash-preexec/master/bash-preexec.sh -o ~/.bash-preexec.sh
@@ -88,7 +88,7 @@ __autoinit_atuin_configure() {
     local xdg_config_home="${XDG_CONFIG_HOME:-"$HOME/.config"}"
     local atuin_config_home="${xdg_config_home}/atuin"
     mkdir -p "$atuin_config_home"
-    if [[ -f "${atuin_config_home}/config.toml" ]]; then
+    if [[ -f "${atuin_config_home}/config.toml" ]] && [[ -n $AUTOINIT_NO_OVERWRITE_CONFIG ]]; then
         __autoinit_debug "autoinit-atuin/configure: not overwriting atuin config.yaml"
     else
         cat > "$HOME/.config/atuin/config.toml" <<CONFIG
@@ -125,6 +125,7 @@ Environment variables:
     - autoinit-atuin configuration:
       - AUTOINIT_ATUIN_AUTOCONFIGURE="${AUTOINIT_ATUIN_AUTOCONFIGURE}"
       - AUTOINIT_ATUIN_SYNC_ON_EXIT="${AUTOINIT_ATUIN_SYNC_ON_EXIT}"
+      - AUTOINIT_NO_OVERWRITE_CONFIG="${AUTOINIT_NO_OVERWRITE_CONFIG}"
 EOD
 }
 
