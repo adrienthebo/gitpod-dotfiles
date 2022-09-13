@@ -5,7 +5,7 @@ source "$HOME/.dotfiles/lib/functions.sh"
 if [[ -f "$HOME/.dotfiles/lib/autoinit.sh" ]]; then
     source "$HOME/.dotfiles/lib/autoinit.sh"
     autoinit init
-    
+
     declare -a autoinit_plugins=(direnv atuin lsd)
 
     for plugin in "${autoinit_plugins[@]}"; do
@@ -18,3 +18,7 @@ alias k="kubectl"
 alias tf="terraform"
 
 export LESS="-iSQR"
+
+cht() {
+    curl https://cht.sh/$1 | /usr/bin/env less
+}
