@@ -14,4 +14,10 @@
 
 `werft run github -j .werft/gke-installer-tests.yaml -a skipTests=true -a deps=external -a preview=true`
 
-- Use
+- Run a werft job and follow the job logs:
+
+`werft run github -j {{path/to/job.yaml}} --follow`
+
+- Follow the logs of an existing job:
+
+`werft job logs {{id}}`
