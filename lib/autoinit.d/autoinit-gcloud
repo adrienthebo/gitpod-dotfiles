@@ -101,6 +101,30 @@ __gcloud_autorun() {
 __gcloud_configure() {
     # gcloud auth login
 
+    if [[ -n $GCP_SVC_CREDENTIALS ]]; then
+        local client_email="$(jq -r .client_email <<< $GCP_SVC_CREDENTIALS)"
+
+        if gcloud auth list --format=json | jq -e "any(.account == \"$client_email\")"; then
+            echo "$(color green "autoinit-gcloud: service account credentials for '$client_email' already activated, skipping activation")"
+        else
+            echo "$(color blue "autoinit-gcloud: activating service account credentials ($client_email) from \$GCP_SVC_CREDENTIALS")"
+
+            local current_configuration="$(gcloud config configurations list --format='get(name)' --filter='is_active:true')"
+            local current_account="$(gcloud config get core/account --format='get(.)')"
+
+            gcloud config configurations create tmp-svcacct-activation --quiet
+            gcloud auth activate-service-account \
+                "$(jq -r .client_email <<< $GCP_SVC_CREDENTIALS)" \
+                --key-file <(echo $GCP_SVC_CREDENTIALS)
+
+            gcloud config configurations activate "$current_configuration"
+            gcloud config configurations delete tmp-svcacct-activation --quiet
+            if [[ -n "$current_account" ]]; then
+                gcloud config set core/account "$current_account"
+            fi
+        fi
+    fi
+
     local adc_file="${GOOGLE_APPLICATION_CREDENTIALS:-$HOME/.config/gcloud/application_default_credentials.json}"
     if [[ -n $GCP_ADC_FILE ]]; then
         if ! [[ -f $adc_file ]]; then
@@ -129,6 +153,7 @@ Manage gcloud, cloudsdk plugins, and gcloud credentials.
 
 Environment variables:
     - GCP_ADC_FILE="${GCP_ADC_FILE}"
+    - GCP_SVC_CREDENTIALS="$(tr "\n" ' ' <<< $GCP_SVC_CREDENTIALS | sed -ne '/[[:alnum:]]/p')"
     - GOOGLE_APPLICATION_CREDENTIALS="${GOOGLE_APPLICATION_CREDENTIALS}"
 EOD
     for var in $(env | awk -F= '/CLOUDSDK/ { print $1 }'); do
