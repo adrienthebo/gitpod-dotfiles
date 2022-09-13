@@ -153,11 +153,15 @@ Manage gcloud, cloudsdk plugins, and gcloud credentials.
 
 Environment variables:
     - GCP_ADC_FILE="${GCP_ADC_FILE}"
-    - GCP_SVC_CREDENTIALS="$(tr "\n" ' ' <<< $GCP_SVC_CREDENTIALS | sed -ne '/[[:alnum:]]/p')"
     - GOOGLE_APPLICATION_CREDENTIALS="${GOOGLE_APPLICATION_CREDENTIALS}"
+    - GCP_SVC_CREDENTIALS="$(tr -d "\n" <<< ${GCP_SVC_CREDENTIALS%$'\n'})"
+    Terraform:
+        - GOOGLE_CREDENTIALS="${GOOGLE_CREDENTIALS}"
+        - GOOGLE_BACKEND_CREDENTIALS="${GOOGLE_BACKEND_CREDENTIALS}"
+    Cloud SDK:
 EOD
-    for var in $(env | awk -F= '/CLOUDSDK/ { print $1 }'); do
-        echo "    - ${var}=\"${!var}\""
+    for var in $(env | awk -F= '/^CLOUDSDK/ { print $1 }'); do
+        echo "        - ${var}=\"${!var}\""
     done
 }
 
