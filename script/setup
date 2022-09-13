@@ -16,5 +16,8 @@ done
 
 [[ -d "$HOME/.local/bin" ]] || mkdir -p "$HOME/.local/bin"
 for executable in $PROJECT_ROOT/bin/*; do
-  cp $executable "$HOME/.local/bin/"
+  cp "$executable" "$HOME/.local/bin/"
 done
+
+[[ -d "$HOME/.local/share/tealdeer" ]] || mkdir -p "$HOME/.local/share/tealdeer"
+[[ -e "$HOME/.local/share/tealdeer/pages" ]] || ln -sf "$PROJECT_ROOT/local/share/tealdeer/pages" "$HOME/.local/share/tealdeer/pages"

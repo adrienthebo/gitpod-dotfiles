@@ -1,0 +1,17 @@
+# werft
+
+> Werft is a Kubernetes-native CI system.
+> More information: <https://github.com/csweichel/werft>.
+
+- Run self-hosted integration tests on EKS (from the current branch):
+
+`werft run github -j .werft/k3s-installer-tests.yaml`
+`werft run github -j .werft/gke-installer-tests.yaml`
+`werft run github -j .werft/eks-installer-tests.yaml`
+`werft run github -j .werft/aks-installer-tests.yaml`
+
+- Use werft to create preview GKE infrastructure with external dependencies:
+
+`werft run github -j .werft/gke-installer-tests.yaml -a skipTests=true -a deps=external -a preview=true`
+
+- Use
