@@ -1,0 +1,11 @@
+# gitpod-ops-cert
+
+> Gitpod self-hosted certificate operations
+
+- Check the status of the external certificate
+
+`cmctl status certificate https-certificates --namespace gitpod`
+
+- Check that the cert-manager challenges are being completed
+
+`kubectl --namespace gitpod get challenge`

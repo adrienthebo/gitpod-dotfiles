@@ -1,0 +1,11 @@
+# gitpod-ops
+
+> Gitpod self-hosted operations
+
+- Tail logs from all Gitpod pods:
+
+`kubectl stern --namespace gitpod -l app=gitpod`
+
+- Tail logs from the Gitpod installer job:
+
+`kubectl stern --namespace gitpod -l component=gitpod-installer`
