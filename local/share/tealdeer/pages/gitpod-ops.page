@@ -9,3 +9,7 @@
 - Tail logs from the Gitpod installer job:
 
 `kubectl stern --namespace gitpod -l component=gitpod-installer`
+
+- Remove the finalizer from stuck workspaces:
+
+`kubectl -n gitpod get pod -l component=workspace  -ojsonpath='{.items[].metadata.name}' | xargs -I _ kubectl -n gitpod patch pod _ -p '{"metadata": {"finalizers": null } }'`
