@@ -32,6 +32,10 @@ __autoinit_info() {
 }
 
 
+__autoinit_notice() {
+    echo "$(color blue "$@")" 1>&2
+}
+
 __autoinit_log() {
     echo "$@" 1>&2
 }
@@ -46,16 +50,16 @@ __autoinit_handle() {
     for plugin in "${__autoinit_plugins[@]}"; do
         if [[ "${plugin}" = $cmd ]]; then
             # shellcheck disable=2005
-            echo "$(color blue "autoinit: handling $cmd")"
+            __autoinit_notice "autoinit: handling $cmd"
             __autoinit_autorun "$cmd" $argv
             local rc=$?
 
-            echo "$(color blue "autoinit: $cmd auto-installed, run 'autoinit init-plugin $plugin' to update your environment")"
+            __autoinit_notice "autoinit: $cmd auto-installed, run 'autoinit init-plugin $plugin' to update your environment"
 
             return $?
         fi
     done
-    echo "$(basename "$SHELL"): $cmd: command not found"
+    echo "$(basename "$SHELL"): $cmd: command not found" 1>&2
     return 127
 }
 
