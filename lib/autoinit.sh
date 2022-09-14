@@ -9,7 +9,7 @@ source "${__LIBDIR}/colors.sh"
 
 __autoinit_debug() {
     if [[ -n $__AUTOINIT_DEBUG ]]; then
-        echo $@ 1>&2
+        echo "$(color grey "$@")" 1>&2
     fi
 }
 
@@ -23,6 +23,12 @@ __autoinit_warn() {
 __autoinit_error() {
     # shellcheck disable=SC2005
     echo "$(color red bold "Error: $@")" 1>&2
+}
+
+
+__autoinit_info() {
+    # shellcheck disable=SC2005
+    echo "$(color green "$@")" 1>&2
 }
 
 
@@ -66,7 +72,7 @@ __autoinit_install() {
             __autoinit_activate_plugin "$plugin"
         fi
     done
-    
+
     if [[ ${#failed_plugins[@]} -ne 0 ]]; then
         __autoinit_error "Failed to install the following plugins: '${failed_plugins}'"
         return 1
@@ -112,16 +118,16 @@ __autoinit_activate() {
 
 __autoinit_activate_plugin() {
     local plugin="$1"
-    __autoinit_debug "autoinit-activate: checking '$plugin'"
+    __autoinit_debug "autoinit/activate: checking '$plugin'"
 
     if "${__AUTOINIT_DIR}/autoinit-$plugin" is-ready; then
-        __autoinit_debug "autoinit-activate: activating $plugin"
+        __autoinit_debug "autoinit/activate: activating $plugin"
 
         eval "$("${__AUTOINIT_DIR}/autoinit-$plugin" init)"
 
         __autoinit_unloaded_plugins=("${__autoinit_unloaded_plugins[@]/$plugin}" )
     else
-        __autoinit_debug "autoinit-activate: $plugin already loaded"
+        __autoinit_debug "autoinit/activate: $plugin already loaded"
     fi
 }
 
@@ -273,7 +279,7 @@ __autoinit_topic() {
 
     case "$topic" in
         "")
-            echo "Available topics: [hooks|lifecycle|plugin-api]"
+            echo "Available topics: [hooks|lifecycle|plugin-api|debugging]"
             ;;
 
         "hooks")
@@ -342,33 +348,48 @@ LIFECYCLE
 
 ## Status commands
 
-- `is-installed`    TODO
-- `is-active`       TODO
-- `is-ready`        TODO
-- `is-shadowed`     TODO
-- `status`          **EXPERIMENTAL** Return a JSON object representing the plugin status
+- 'is-installed'    TODO
+- 'is-active'       TODO
+- 'is-ready'        TODO
+- 'is-shadowed'     TODO
+- 'status'          **EXPERIMENTAL** Return a JSON object representing the plugin status
 
 ###
 
-- `install`
-- `activate`
-- `init`            Called upon shell startup. Configures the shell plugin.
+- 'install'
+- 'activate'
+- 'init'            Called upon shell startup. Configures the shell plugin.
                     **Note:** A plugin can be initialized without being installed; this
                     allows a plugin to work with a both autoinit-installed plugin as
                     well as a plugin present on the system itself.
-- `completion`      **EXPERIMENTAL** Called upon shell startup
-- `configure`       Called upon workspace creation (or credential refresh)
+- 'completion'      **EXPERIMENTAL** Called upon shell startup
+- 'configure'       Called upon workspace creation (or credential refresh)
 
 ### Informational
 
-- `describe`
+- 'describe'
 
 ### TBD
 
-- `autoload`
-- `autorun`
+- 'autoload'
+- 'autorun'
 
 PLUGINAPI
+            ;;
+        debugging)
+          cat - <<DEBUGGING
+# Debugging autoinit
+
+## Debugging commands
+
+- 'autoinit exec'       Directly execute plugin subcommands (useful for debugging plugin init and activation)
+- 'autoinit _edit'      Open a plugin in your editor
+
+## Enable debug logging
+
+\`export __AUTOINIT_DEBUG=1\`
+
+DEBUGGING
             ;;
         *)
           __autoinit_error "Unknown topic '$topic'"
