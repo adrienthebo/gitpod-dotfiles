@@ -1,0 +1,11 @@
+# gitpod-refarch-eks
+
+> Setup instructions for Gitpod on GKE
+
+- Get the Cloud DNS zone nameservers:
+
+`rrdatas="$(gcloud dns managed-zones describe $ZONE_NAME  --format='value[delimiter=","](nameServers)')"`
+
+- Delegate from Google Cloud DNS to Route53:
+
+`gcloud dns record-sets create $DOMAIN_NAME --rrdatas="$rrdatas" -z gitpod --type=NS`

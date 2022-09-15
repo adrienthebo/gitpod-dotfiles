@@ -2,6 +2,10 @@
 
 > Gitpod reference architecture notes.
 
+- GKE reference architecture notes:
+
+`tldr gitpod-refarch-gke`
+
 - EKS reference architecture notes:
 
 `tldr gitpod-refarch-eks`
