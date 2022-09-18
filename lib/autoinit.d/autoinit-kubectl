@@ -14,6 +14,7 @@ __autoinit_kubectl_describe() {
 Install and manage kubectl
 
 Environment variables:
+    - KUBECONFIG="${KUBECONFIG}"
     - AUTOINIT_KUBECTL_VERSION="${AUTOINIT_KUBECTL_VERSION}"
 EOD
 }
@@ -21,16 +22,16 @@ EOD
 
 main() {
     local cmd="$1"
-    
+
     case "$cmd" in
         init)
-            __autoinit_kubectl_init 
+            __autoinit_kubectl_init
             ;;
 
         describe)
             __autoinit_kubectl_describe
             ;;
-            
+
         *)
             "${AUTOINIT_D}/autoinit-asdf-plugin" "kubectl" $@
             ;;
