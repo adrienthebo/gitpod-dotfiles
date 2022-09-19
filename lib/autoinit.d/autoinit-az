@@ -67,6 +67,8 @@ Environment variables:
         - ARM_TENANT_ID="${ARM_TENANT_ID}"
         - ARM_CLIENT_ID="${ARM_CLIENT_ID}"
         - ARM_CLIENT_SECRET="${ARM_CLIENT_SECRET}"
+    - autoinit extensions:
+        - AKS_CLUSTER="$AKS_CLUSTER"
 
 Documentation:
     - [Azure SDK environment variables](https://github.com/Azure/azure-sdk/blob/main/_includes/tables/environment_variables.md)
