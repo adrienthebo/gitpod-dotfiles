@@ -37,6 +37,11 @@ __autoinit_az_configure() {
     else
         az login --service-principal -u "$AZURE_CLIENT_ID" -p "$AZURE_CLIENT_SECRET" --tenant "$AZURE_TENANT_ID"
     fi
+
+    if [[ -n $AKS_CLUSTER ]]; then
+        __autoinit_notice "autoinit-az/configure: Fetching AKS credentials for '$AKS_CLUSTER'"
+        az aks get-credentials --name "$AKS_CLUSTER"
+    fi
 }
 
 
