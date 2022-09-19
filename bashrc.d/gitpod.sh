@@ -41,6 +41,20 @@ __gitpod_license() {
     gsutil cp "gs://adrien-self-hosted-testing-5k4-license-25500/license.yaml" .
 }
 
+__gitpod_backup_certs() {
+    [[ -d /workspace/cluster ]] || mkdir -p /workspace/cluster
+    kubectl --namespace gitpod get certificate https-certificates -oyaml \
+      | kubectl neat \
+      > /workspace/cluster/https-certificates.certificate.yaml
+    bat --pager=never -lyaml /workspace/cluster/https-certificates.certificate.yaml
+
+
+    kubectl --namespace gitpod get secret https-certificates -oyaml \
+      | kubectl neat \
+      > /workspace/cluster/https-certificates.secret.yaml
+    bat --pager=never -lyaml /workspace/cluster/https-certificates.secret.yaml
+}
+
 alias gitpod-reload-dotfiles="__gitpod_reload_dotfiles"
 
 alias gitpod-get-license="__gitpod_license"
