@@ -18,12 +18,12 @@ __gitpod_reload_dotfiles() {
 
 
 __gitpod_kotsup() {
-    if ! [[ -f license.yaml ]]; then
+    if ! [[ -f /workspace/cluster/license.yaml ]]; then
         echo "Error: KOTS license-file 'license.yaml' absent, cannot install"
         return 1
     fi
 
-    kubectl-kots install gitpod --namespace gitpod --shared-password=gitpod --no-port-forward --license-file license.yaml
+    kubectl-kots install gitpod --namespace gitpod --shared-password=gitpod --no-port-forward --license-file /workspace/cluster/license.yaml
 }
 
 __gitpod_kotsdash() {
@@ -38,7 +38,8 @@ __gitpod_kotsdash() {
 }
 
 __gitpod_license() {
-    gsutil cp "gs://adrien-self-hosted-testing-5k4-license-25500/license.yaml" .
+    [[ -d /workspace/cluster ]] || mkdir -p /workspace/cluster
+    gsutil cp "gs://adrien-self-hosted-testing-5k4-license-25500/license.yaml" /workspace/cluster/license.yaml
 }
 
 __gitpod_backup_certs() {
@@ -54,6 +55,14 @@ __gitpod_backup_certs() {
       > /workspace/cluster/https-certificates.secret.yaml
     bat --pager=never -lyaml /workspace/cluster/https-certificates.secret.yaml
 }
+
+__gitpod_restore_certs() {
+    kubectl create namespace gitpod
+
+    kubectl --namespace gitpod apply -f /workspace/cluster/https-certificates.secret.yaml
+    kubectl --namespace gitpod apply -f /workspace/cluster/https-certificates.certificate.yaml
+}
+
 
 alias gitpod-reload-dotfiles="__gitpod_reload_dotfiles"
 
