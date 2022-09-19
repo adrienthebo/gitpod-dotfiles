@@ -15,9 +15,14 @@ __autoinit_az_init() {
 __autoinit_az_configure() {
     declare -a azure_sp_vars=(AZURE_CLIENT_ID AZURE_CLIENT_SECRET AZURE_TENANT_ID)
     local missing_sp_vars=false
-    
+
     az config set core.collect_telemetry=no
     az config set core.output=table
+
+    if [[ -n $AZURE_RESOURCE_GROUP ]]; then
+        __autoinit_notice "autoinit-az/configure: setting default resource group to '$AZURE_RESOURCE_GROUP'"
+        az config set defaults.group="$AZURE_RESOURCE_GROUP"
+    fi
 
     for v in "${azure_sp_vars[@]}"; do
         if [[ -z "${!v}" ]]; then
@@ -57,7 +62,7 @@ Environment variables:
         - ARM_TENANT_ID="${ARM_TENANT_ID}"
         - ARM_CLIENT_ID="${ARM_CLIENT_ID}"
         - ARM_CLIENT_SECRET="${ARM_CLIENT_SECRET}"
-    
+
 Documentation:
     - [Azure SDK environment variables](https://github.com/Azure/azure-sdk/blob/main/_includes/tables/environment_variables.md)
     - [Azure Terraform provider variables](https://docs.microsoft.com/en-us/azure/developer/terraform/authenticate-to-azure?tabs=bash)
