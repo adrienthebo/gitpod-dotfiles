@@ -1,22 +1,61 @@
 #!/usr/bin/env bash
 
 AUTOINIT_D="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
+__LIBDIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")"
+source "${__LIBDIR}/colors.sh"
+source "${__LIBDIR}/autoinit.sh"
 
 
 __autoinit_direnv_init() {
     "${AUTOINIT_D}/autoinit-asdf-plugin" "direnv" "init"
-    echo 'eval "$(direnv hook "$(basename "$SHELL")")"'
+    cat - <<EOD
+eval "\$(direnv hook "\$(basename "\$SHELL")")"
+if [[ \$AUTOINIT_DIRENV_AUTOCONFIGURE == "true" ]]; then
+    ${BASH_SOURCE[0]} configure
+fi
+EOD
+}
+
+
+__autoinit_direnv_configure() {
+    if [[ $AUTOINIT_DIRENV_ALLOW_WORKSPACE == "true" ]]; then
+        __autoinit_notice "autoinit-direnv: whitelisting /workspace"
+        if ! [[ -f $HOME/.config/direnv/config.toml ]]; then
+            [[ -d $HOME/.config/direnv ]] || mkdir -p $HOME/.config/direnv
+            echo -e "[whitelist]\nprefix = [ \"/workspace\" ]\n" > $HOME/.config/direnv/config.toml
+        fi
+    fi
+}
+
+__autoinit_direnv_describe() {
+    cat - <<EOD
+# direnv
+
+> More information: <https://direnv.net/>.
+
+Environment variables:
+    - AUTOINIT_DIRENV_AUTOCONFIGURE="$AUTOINIT_DIRENV_AUTOCONFIGURE"
+    - AUTOINIT_DIRENV_ALLOW_WORKSPACE="$AUTOINIT_DIRENV_ALLOW_WORKSPACE"
+EOD
 }
 
 
 main() {
     local cmd="$1"
-    
+
     case "$cmd" in
         init)
-            __autoinit_direnv_init 
+            __autoinit_direnv_init
             ;;
-            
+
+        configure)
+            __autoinit_direnv_configure
+            ;;
+
+        describe)
+            __autoinit_direnv_describe
+            ;;
+
         *)
             "${AUTOINIT_D}/autoinit-asdf-plugin" "direnv" $@
             ;;
