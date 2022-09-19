@@ -240,6 +240,11 @@ __autoinit_edit() {
 }
 
 
+__autoinit_cd() {
+    pushd "$(dirname "${BASH_SOURCE[0]}")"
+}
+
+
 __autoinit_configure() {
     local plugin="$1"
 
@@ -434,6 +439,7 @@ EOD
     Developer commands:
         exec            Run an autoinit plugin subcommand
         _edit           Edit an autoinit plugin implementation
+        _cd             Change directories to the autoinit dir
 
     Other commands:
         help            Show this help
@@ -486,6 +492,10 @@ autoinit() {
 
         _edit)
             __autoinit_edit "${args[0]}"
+            ;;
+
+        _cd)
+            __autoinit_cd
             ;;
 
         activate)
