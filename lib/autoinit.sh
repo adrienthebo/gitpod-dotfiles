@@ -5,6 +5,7 @@ __LIBDIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 __AUTOINIT_DIR="${__LIBDIR}/autoinit.d"
 
 source "${__LIBDIR}/colors.sh"
+source "${__LIBDIR}/autoinit-logging.sh"
 
 
 __autoinit_debug() {
