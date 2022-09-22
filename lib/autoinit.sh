@@ -68,13 +68,84 @@ __autoinit_alias_fn() {
 __autoinit_register() {
     local plugin="$1"
     local handler="$2"
+    local shimtype="$3"
     __autoinit_debug "autoinit-register: registering '${plugin}' with handler '${handler}'"
 
-    __autoinit_plugins+=("$plugin")
-    __autoinit_command_handlers[$plugin]="$handler"
+    __autoinit_add_command_shim "$plugin" "$handler" "$shimtype"
 
     __autoinit_unloaded_plugins+=("$plugin")
-    __autoinit_debug "autoinit-register: registered plugins='${__autoinit_plugins[@]}', unloaded='${__autoinit_unloaded_plugins[@]}'"
+    __autoinit_debug "autoinit-register: registered plugins='${__autoinit_plugins[*]}', unloaded='${__autoinit_unloaded_plugins[*]}'"
+}
+
+
+__autoinit_add_command_shim() {
+    local command="$1"
+    local handler="$2"
+    local shimtype="$3"
+
+    __autoinit_debug "autoinit/add-command-shim: command=$1 handler=$2 shimtype=$3"
+
+    case $shimtype in
+        binstub)
+            local binstub_shimdir="$HOME/.local/libexec/autoinit/bin"
+            local binstub_shim="$binstub_shimdir/$command"
+
+            [[ -d $binstub_shimdir ]] || mkdir -p "$binstub_shimdir"
+
+            cat - > "$binstub_shim" <<EOD
+#!/usr/bin/env bash
+
+echo "$(color blue "autoinit: handling $command")"
+"$handler" autorun "$command" \$@
+rc=\$?
+if $handler is-installed; then
+    echo "$(color green "$command installed, removing binstub \${BASH_SOURCE[0]}")"
+    rm "\${BASH_SOURCE[0]}"
+fi
+
+exit \$rc
+EOD
+            chmod +x "$binstub_shim"
+
+            if ! [[ $PATH =~ "$binstub_shimdir" ]]; then
+                export PATH="$PATH:$binstub_shimdir"
+            fi
+            ;;
+
+        cnf|"")
+            __autoinit_plugins+=("$plugin")
+            __autoinit_command_handlers[$plugin]="$handler"
+            ;;
+        *)
+            __autoinit_error "autoinit/add-command-shim: unhandled shim type '$shimtype', expected one of [binstub,cnf]"
+    esac
+}
+
+__autoinit_remove_command_shim() {
+    local command="$1"
+    local handler="$2"
+    # Ignored for now, we probe for all possible shims and nuke them all
+    #local shimtype="$3"
+
+    # Wacky, but again - we're aggressively removing all possible shims.
+    for shimtype in cnf binstub; do
+        case $shimtype in
+            binstub)
+                local binstub_shimdir="$HOME/.local/libexec/autoinit/bin"
+                local binstub_shim="$binstub_shimdir/$"
+                [[ -d $binstub_shimdir ]] || mkdir "$binstub_shimdir"
+
+                if [[ -f $binstub_shim ]]; then
+                    rm -f $binstub_shim
+                fi
+                ;;
+            cnf)
+                ;;
+            *)
+                __autoinit_error "autoinit/remove-command-shim: unhandled shim type '$shimtype', expected one of [binstub,cnf]"
+                ;;
+        esac
+    done
 }
 
 
@@ -132,13 +203,20 @@ __autoinit_status() {
 
 }
 
+
 __autoinit_init() {
     echo "$(color cyan bold "autoinit: enabling shell hooks")"
 
     declare -ag __autoinit_plugins
     declare -Ag __autoinit_command_handlers
+    declare -Ag __autoinit_command_shims
     declare -ag __autoinit_unloaded_plugins
 
+    __autoinit_register_default_plugins
+}
+
+
+__autoinit_register_default_plugins() {
     __autoinit_alias_fn "__autoinit_handle" "command_not_found_handle"
 
     __autoinit_register "asdf"         "${__AUTOINIT_DIR}/autoinit-asdf"
@@ -153,8 +231,8 @@ __autoinit_init() {
     __autoinit_register "helm"         "${__AUTOINIT_DIR}/autoinit-helm"
     __autoinit_register "jiq"          "${__AUTOINIT_DIR}/autoinit-jiq"
     __autoinit_register "kubectl"      "${__AUTOINIT_DIR}/autoinit-kubectl"
-    __autoinit_register "kubectl-kots" "${__AUTOINIT_DIR}/autoinit-kubectl-kots"
-    __autoinit_register "kubectl-krew" "${__AUTOINIT_DIR}/autoinit-kubectl-krew"
+    __autoinit_register "kubectl-kots" "${__AUTOINIT_DIR}/autoinit-kubectl-kots" "binstub"
+    __autoinit_register "kubectl-krew" "${__AUTOINIT_DIR}/autoinit-kubectl-krew" "binstub"
     __autoinit_register "lsd"          "${__AUTOINIT_DIR}/autoinit-lsd"
     __autoinit_register "tldr"         "${__AUTOINIT_DIR}/autoinit-tldr"
 }
@@ -245,6 +323,7 @@ __autoinit_unload() {
 __autoinit_clear() {
     unset __autoinit_plugins
     unset __autoinit_command_handlers
+    unset __autoinit_command_shims
     unset __autoinit_unloaded_plugins
     unset command_not_found_handle
 }
