@@ -13,19 +13,16 @@ __autoinit_handle() {
     local cmd="$1"
 
     # shellcheck disable=2199
-    local plugin
-    for plugin in "${__autoinit_plugins[@]}"; do
-        if [[ "${plugin}" = $cmd ]]; then
-            # shellcheck disable=2005
-            __autoinit_notice "autoinit: handling $cmd (using cnf handler)"
-            __autoinit_autorun "$cmd" $argv
-            local rc=$?
+    if [[ -n "${__autoinit_command_shims[$cmd]}" || -z "${__autoinit_command_shims[$cmd]:-x}" ]]; then
+        # shellcheck disable=2005
+        __autoinit_notice "autoinit: handling $cmd (using cnf handler)"
+        "${__autoinit_command_handlers[$cmd]}" autorun "$cmd" $argv
+        local rc=$?
 
-            __autoinit_notice "autoinit: $cmd auto-installed, run 'autoinit init-plugin $plugin' to update your environment"
+        __autoinit_notice "autoinit: $cmd auto-installed, run 'autoinit init-plugin $cmd' to update your environment"
 
-            return $?
-        fi
-    done
+        return $?
+    fi
     echo "$(basename "$SHELL"): $cmd: command not found" 1>&2
     return 127
 }
