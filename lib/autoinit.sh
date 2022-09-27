@@ -17,7 +17,7 @@ __autoinit_handle() {
     for plugin in "${__autoinit_plugins[@]}"; do
         if [[ "${plugin}" = $cmd ]]; then
             # shellcheck disable=2005
-            __autoinit_notice "autoinit: handling $cmd"
+            __autoinit_notice "autoinit: handling $cmd (using cnf handler)"
             __autoinit_autorun "$cmd" $argv
             local rc=$?
 
@@ -41,6 +41,7 @@ __autoinit_install() {
             failed_plugins+=("$plugin")
         else
             __autoinit_activate_plugin "$plugin"
+            __autoinit_notice "autoinit: $plugin installed and initalized."
         fi
     done
 
@@ -71,6 +72,9 @@ __autoinit_register() {
     local shimtype="$3"
     __autoinit_debug "autoinit-register: registering '${plugin}' with handler '${handler}'"
 
+    __autoinit_plugins+=("$plugin")
+
+    __autoinit_command_shims[$plugin]="${shimtype:-cnf}"
     __autoinit_add_command_shim "$plugin" "$handler" "$shimtype"
 
     __autoinit_unloaded_plugins+=("$plugin")
@@ -95,7 +99,7 @@ __autoinit_add_command_shim() {
             cat - > "$binstub_shim" <<EOD
 #!/usr/bin/env bash
 
-echo "$(color blue "autoinit: handling $command")"
+echo "$(color blue "autoinit: handling $command (using binstub handler)")"
 "$handler" autorun "$command" \$@
 rc=\$?
 if $handler is-installed; then
@@ -113,7 +117,6 @@ EOD
             ;;
 
         cnf|"")
-            __autoinit_plugins+=("$plugin")
             __autoinit_command_handlers[$plugin]="$handler"
             ;;
         *)
@@ -177,7 +180,7 @@ __autoinit_status() {
     local plugin
 
     (
-        echo "Name Status Loaded Shadowed"
+        echo "Name Status Loaded Shadowed Shimtype"
         for plugin in ${__autoinit_plugins[*]}; do
             echo " \
                 $plugin \
@@ -196,6 +199,7 @@ __autoinit_status() {
                         && color grey bold "ok" \
                         || color yellow bold "shadowed"
                 ) \
+                ${__autoinit_command_shims[$plugin]} \
             "
 
         done | sort
