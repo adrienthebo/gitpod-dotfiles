@@ -138,6 +138,7 @@ __autoinit_asdf_plugin_autoload() {
 __autoinit_asdf_plugin_autorun() {
     local plugin="$1"
     shift
+    shift
     local argv="$@"
 
     __autoinit_asdf_plugin_autoload "$plugin" || return 254
