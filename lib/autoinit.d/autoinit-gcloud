@@ -101,10 +101,23 @@ __gcloud_autorun() {
 __gcloud_configure() {
     # gcloud auth login
 
+    local user_account="$AUTOINIT_GCLOUD_USER_ACCOUNT"
+    if [[ -n "$user_account" ]]; then
+        __autoinit_notice "gcloud account: $user_account"
+
+        if gcloud auth list --format=json | jq -e "any(.account == \"$user_account\")" >/dev/null; then
+            echo "$(color green "autoinit-gcloud/configure: service account credentials for '$user_account' already present, skipping login")"
+        else
+            echo "$(color blue "autoinit-gcloud/configure: logging in for account ($user_account)")"
+            gcloud auth login "$user_account" && gcloud config set core/account "$user_account"
+        fi
+    fi
+
+
     if [[ -n $GCP_SVC_CREDENTIALS ]]; then
         local client_email="$(jq -r .client_email <<< $GCP_SVC_CREDENTIALS)"
 
-        if gcloud auth list --format=json | jq -e "any(.account == \"$client_email\")"; then
+        if gcloud auth list --format=json | jq -e "any(.account == \"$client_email\")" >/dev/null; then
             echo "$(color green "autoinit-gcloud: service account credentials for '$client_email' already activated, skipping activation")"
         else
             echo "$(color blue "autoinit-gcloud: activating service account credentials ($client_email) from \$GCP_SVC_CREDENTIALS")"
@@ -152,13 +165,16 @@ __gcloud_describe() {
 Manage gcloud, cloudsdk plugins, and gcloud credentials.
 
 Environment variables:
-    - GCP_ADC_FILE="${GCP_ADC_FILE}"
-    - GOOGLE_APPLICATION_CREDENTIALS="${GOOGLE_APPLICATION_CREDENTIALS}"
-    - GCP_SVC_CREDENTIALS="$(tr -d "\n" <<< ${GCP_SVC_CREDENTIALS%$'\n'})"
+
+    Autoinit:
+        - AUTOINIT_GCLOUD_USER_ACCOUNT="$AUTOINIT_GCLOUD_USER_ACCOUNT"
+        - GCP_SVC_CREDENTIALS="$(tr -d "\n" <<< ${GCP_SVC_CREDENTIALS%$'\n'})"
     Terraform:
         - GOOGLE_CREDENTIALS="${GOOGLE_CREDENTIALS}"
         - GOOGLE_BACKEND_CREDENTIALS="${GOOGLE_BACKEND_CREDENTIALS}"
     Cloud SDK:
+        - GCP_ADC_FILE="${GCP_ADC_FILE}"
+        - GOOGLE_APPLICATION_CREDENTIALS="${GOOGLE_APPLICATION_CREDENTIALS}"
 EOD
     for var in $(env | awk -F= '/^CLOUDSDK/ { print $1 }'); do
         echo "        - ${var}=\"${!var}\""
