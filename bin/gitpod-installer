@@ -12,7 +12,17 @@
 set -euo pipefail
 
 # Set the version to use - see https://werft.gitpod-dev.com for available values
-GITPOD_INSTALLER_VERSION="${GITPOD_INSTALLER_VERSION:-release-2022.07.3.2}"
+
+if [[ -z ${GITPOD_INSTALLER_VERSION:-""} ]]; then
+    if [[ -f $HOME/.cache/gitpod-installer-version ]]; then
+        GITPOD_INSTALLER_DEFAULT_VERSION="$(cat $HOME/.cache/gitpod-installer-version)"
+    fi
+    GITPOD_INSTALLER_VERSION="$(gcloud container images list-tags eu.gcr.io/gitpod-core-dev/build/installer --format='get(tags)' --filter='tags:release-*' 2>/dev/null | fzf --query="${GITPOD_INSTALLER_DEFAULT_VERSION:-""}")"
+    echo $GITPOD_INSTALLER_VERSION > $HOME/.cache/gitpod-installer-version
+fi
+echo "Using gitpod-installer $GITPOD_INSTALLER_VERSION. (run \`export GITPOD_INSTALLER_VERSION=$GITPOD_INSTALLER_VERSION\` to persist this setting.)"
+
+# gcloud container images list-tags eu.gcr.io/gitpod-core-dev/build/installer --filter='tags:release-*'
 
 # Check docker is available
 which docker > /dev/null || (echo "Docker not installed - see https://docs.docker.com/engine/install" && exit 1)
