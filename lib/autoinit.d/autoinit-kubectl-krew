@@ -41,8 +41,8 @@ __krew_install_plugin() {
     local plugin
     plugin=$1
 
-    if ! kubectl-krew list | grep -q "$plugin"; then
-        kubectl-krew install "$plugin"
+    if ! $HOME/.krew/bin/kubectl-krew list | grep -q "$plugin"; then
+        $HOME/.krew/bin/kubectl-krew install "$plugin"
     fi
 }
 
@@ -87,7 +87,7 @@ __krew_autoload() {
         fi
     fi
 
-    if ! __krew_is_active ; then
+    if ! __krew_is_active || __krew_is_shadowed; then
         eval "$(__krew_init)"
     fi
 }
@@ -97,7 +97,11 @@ __krew_autorun() {
 
     __krew_autoload || return 254
 
-    $ARGV
+    # There's a path order conflict between the binstub shim method and krew's path insertion order.
+    # Specifically the krew path can be inserted after the binstub shim path causing an infinite recusion.
+    # To bypass this autorun commands manually patch the krew bindir to the beginning of the path
+    # to avoid this silliness.
+    PATH="$HOME/.krew/bin:$PATH" $ARGV
     return $?
 }
 
