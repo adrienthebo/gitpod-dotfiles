@@ -125,12 +125,13 @@ __gcloud_configure() {
             local current_configuration="$(gcloud config configurations list --format='get(name)' --filter='is_active:true')"
             local current_account="$(gcloud config get core/account --format='get(.)')"
 
-            gcloud config configurations create tmp-svcacct-activation --quiet
-            gcloud auth activate-service-account \
+            tmp_configuration="tmp-svcacct-activation"
+            gcloud config configurations create "$tmp_configuration" --quiet --no-activate
+            gcloud --configuration "$tmp_configuration" auth activate-service-account \
                 "$(jq -r .client_email <<< $GCP_SVC_CREDENTIALS)" \
                 --key-file <(echo $GCP_SVC_CREDENTIALS)
 
-            gcloud config configurations activate "$current_configuration"
+            #gcloud config configurations activate "$current_configuration"
             gcloud config configurations delete tmp-svcacct-activation --quiet
             if [[ -n "$current_account" ]]; then
                 gcloud config set core/account "$current_account"
