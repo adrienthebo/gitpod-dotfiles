@@ -79,7 +79,7 @@ AWSFILE
             __autoinit_warn "autoinit-aws: SSO login failed - finishing aws configuration early"
             return 1
         else
-            aws sts get-caller-identity
+            PAGER=/bin/cat aws sts get-caller-identity
         fi
     fi
 
