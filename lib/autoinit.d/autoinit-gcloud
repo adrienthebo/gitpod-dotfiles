@@ -98,9 +98,7 @@ __gcloud_autorun() {
 }
 
 
-__gcloud_configure() {
-    # gcloud auth login
-
+__gcloud_configure_user() {
     local user_account="$AUTOINIT_GCLOUD_USER_ACCOUNT"
     if [[ -n "$user_account" ]]; then
         __autoinit_notice "gcloud account: $user_account"
@@ -112,8 +110,9 @@ __gcloud_configure() {
             gcloud auth login "$user_account" && gcloud config set core/account "$user_account"
         fi
     fi
+}
 
-
+__gcloud_configure_svc_acct() {
     if [[ -n $GCP_SVC_CREDENTIALS ]]; then
         local client_email="$(jq -r .client_email <<< $GCP_SVC_CREDENTIALS)"
 
@@ -138,7 +137,10 @@ __gcloud_configure() {
             fi
         fi
     fi
+}
 
+
+__gcloud_configure_adc() {
     local adc_file="${GOOGLE_APPLICATION_CREDENTIALS:-$HOME/.config/gcloud/application_default_credentials.json}"
     if [[ -n $GCP_ADC_FILE ]]; then
         if ! [[ -f $adc_file ]]; then
@@ -157,6 +159,14 @@ __gcloud_configure() {
     else
         echo "$(color green "autoinit-gcloud: cloudsdk credentials present, no login required")"
     fi
+}
+
+__gcloud_configure() {
+    # gcloud auth login
+
+    __gcloud_configure_user
+    __gcloud_configure_svc_acct
+    __gcloud_configure_adc
 }
 
 
