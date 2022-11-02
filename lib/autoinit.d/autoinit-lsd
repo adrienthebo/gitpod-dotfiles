@@ -10,7 +10,7 @@ __autoinit_lsd_init() {
     cat - <<EOD
 if [[ -d "\$HOME/.local/bin" ]]; then
     if ! [[ \$PATH =~ "\$HOME/.local/bin" ]]; then
-        export \$PATH="\$PATH:\$HOME/.local/bin"
+        export PATH="\$PATH:\$HOME/.local/bin"
     fi
 fi
 
@@ -26,14 +26,14 @@ __autoinit_lsd_install() {
     [[ -d "$HOME/.local/bin" ]] || mkdir -p "$HOME/.local/bin"
 
     tmpdir="$(mktemp -d)"
-    
+
     local lsd_version="0.22.0"
     (
         set -e
         cd "$tmpdir"
         curl -LO https://github.com/Peltoche/lsd/releases/download/$lsd_version/lsd-${lsd_version}-x86_64-unknown-linux-musl.tar.gz
         tar -xf lsd-${lsd_version}-x86_64-unknown-linux-musl.tar.gz
-        
+
         mkdir -p "$HOME/.local/share/lsd/"
         cp -r "lsd-${lsd_version}-x86_64-unknown-linux-musl/autocomplete" "$HOME/.local/share/lsd/autocomplete"
         cp "lsd-${lsd_version}-x86_64-unknown-linux-musl/lsd" "$HOME/.local/bin/lsd"
@@ -42,7 +42,7 @@ __autoinit_lsd_install() {
     if [[ $? -eq 0 ]]; then
         eval "$(__autoinit_lsd_init)"
     fi
-    
+
     if [[ -d "$tmpdir" ]]; then
         rm -rf "$tmpdir"
     fi
@@ -91,7 +91,6 @@ __autoinit_lsd_autoload() {
     fi
 
     if ! __autoinit_lsd_is_active ; then
-        echo eval "$(__autoinit_lsd_init)"
         eval "$(__autoinit_lsd_init)"
     fi
 }
