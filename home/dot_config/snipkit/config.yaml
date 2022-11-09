@@ -16,14 +16,6 @@ config:
     # If set to true, any comments in your scripts will be removed upon executing or printing.
     removeComments: false
   manager:
-    pet:
-      # Set to true if you want to use pet.
-      enabled: true
-      # List of pet snippet files.
-      libraryPaths:
-        - /home/gitpod/.config/pet/snippet.toml
-      # If this list is not empty, only those snippets that match the listed tags will be provided to you.
-      includeTags: []
     fsLibrary:
       # If set to false, the files specified via libraryPath will not be provided to you.
       enabled: true
