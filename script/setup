@@ -4,26 +4,12 @@ PROJECT_ROOT="$(realpath $(dirname $(dirname "${BASH_SOURCE[0]}")))"
 
 echo "Project root: $PROJECT_ROOT"
 
+brew install chezmoi
+
+chezmoi init --source $HOME/.dotfiles
+chezmoi apply -v
+
 for script in $PROJECT_ROOT/script.d/*.sh; do
   echo "Running setup script $script"
   $script
 done
-
-for script in $PROJECT_ROOT/bashrc.d/*.sh; do
-  echo "Copying bashrc $script to $HOME/.bashrc.d/"
-  cp $script ~/.bashrc.d/
-done
-
-[[ -d "$HOME/.local/bin" ]] || mkdir -p "$HOME/.local/bin"
-for executable in $PROJECT_ROOT/bin/*; do
-  cp "$executable" "$HOME/.local/bin/"
-done
-
-[[ -d "$HOME/.config" ]] || mkdir "$HOME/.config"
-for path in $PROJECT_ROOT/config/*; do
-  ln -sf "$(realpath "$path")" "$HOME/.config/$(basename "$path")"
-done
-
-
-[[ -d "$HOME/.local/share/tealdeer" ]] || mkdir -p "$HOME/.local/share/tealdeer"
-[[ -e "$HOME/.local/share/tealdeer/pages" ]] || ln -sf "$PROJECT_ROOT/local/share/tealdeer/pages" "$HOME/.local/share/tealdeer/pages"
