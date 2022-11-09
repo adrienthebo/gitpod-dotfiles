@@ -30,7 +30,6 @@ config:
       # Paths directories that hold snippets files. Each file must hold one snippet only.
       libraryPath:
         - /home/gitpod/.dotfiles/snippets
-        - /another/path
       # Only files with endings which match one of the listed suffixes will be considered.
       # If set to true, the files will not be parsed in advance. This means, only the filename can be used as the snippet name.
       lazyOpen: false
