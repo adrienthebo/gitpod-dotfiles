@@ -119,6 +119,7 @@ main() {
     # the werft namespace.
     setup_gcloud_sa
     $@
+    exit $?
 }
 
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
