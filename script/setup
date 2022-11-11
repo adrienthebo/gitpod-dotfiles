@@ -19,8 +19,13 @@ fi
 
 brew install chezmoi
 
+# To reduce the number of repositories and round trips we use ~/.dotfiles as the chezmoi
+# source; using the default source will add a second repository that needs to be cloned.
+# On the first invocations of chezmoi this alternate source path needs to be specified
+# for init and apply; the `chezmoi apply` will create `~/.config/chezmoi/chezmoi.toml`
+# which will persist the sourceDir in subsequent invocations.
 chezmoi --source $HOME/.dotfiles init $HOME/.dotfiles
-chezmoi apply -v
+chezmoi --source $HOME/.dotfiles apply -v
 
 for script in $PROJECT_ROOT/script.d/*.sh; do
   echo "Running setup script $script"
