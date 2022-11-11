@@ -4,9 +4,13 @@ PROJECT_ROOT="$(realpath $(dirname $(dirname "${BASH_SOURCE[0]}")))"
 
 echo "Project root: $PROJECT_ROOT"
 
+if ! command -v brew 1>/dev/null 2>/dev/null; then
+  NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
+
 brew install chezmoi
 
-chezmoi init --source $HOME/.dotfiles
+chezmoi --source $HOME/.dotfiles init $HOME/.dotfiles
 chezmoi apply -v
 
 for script in $PROJECT_ROOT/script.d/*.sh; do
