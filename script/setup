@@ -4,6 +4,8 @@ PROJECT_ROOT="$(realpath $(dirname $(dirname "${BASH_SOURCE[0]}")))"
 
 echo "Project root: $PROJECT_ROOT"
 
+sudo chown gitpod:gitpod "$HOME/.bash_profile"
+
 #if [[ -d "/home/linuxbrew" ]]; then
 #  echo "Loading linuxbrew shellenv"
 #  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
@@ -11,7 +13,6 @@ echo "Project root: $PROJECT_ROOT"
 #
 #if ! command -v brew 1>/dev/null 2>/dev/null; then
 #  NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-#  sudo chown gitpod:gitpod "$HOME/.bash_profile"
 #  echo '# Set PATH, MANPATH, etc., for Homebrew.' >> "$HOME/.bash_profile"
 #  echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> "$HOME/.bash_profile"
 #  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
