@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+AUTOINIT_D="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
+
+
+__autoinit_chezmoi_init() {
+    "${AUTOINIT_D}/autoinit-asdf-plugin" "chezmoi" "init"
+    echo "eval \"\$(chezmoi completion bash)\""
+}
+
+
+main() {
+    local cmd="$1"
+
+    case "$cmd" in
+        init)
+            __autoinit_chezmoi_init
+            ;;
+
+        *)
+            "${AUTOINIT_D}/autoinit-asdf-plugin" "chezmoi" $@
+            ;;
+    esac
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    # shellcheck disable=SC2068
+    main $@
+fi

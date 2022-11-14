@@ -236,6 +236,7 @@ __autoinit_register_default_plugins() {
     __autoinit_register "kubectl-krew" "${__AUTOINIT_DIR}/autoinit-kubectl-krew" "binstub"
     __autoinit_register "lsd"          "${__AUTOINIT_DIR}/autoinit-lsd"
     __autoinit_register "tldr"         "${__AUTOINIT_DIR}/autoinit-tldr"
+    __autoinit_register "chezmoi"         "${__AUTOINIT_DIR}/autoinit-chezmoi"
 }
 
 
