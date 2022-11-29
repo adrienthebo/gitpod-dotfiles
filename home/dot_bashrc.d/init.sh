@@ -22,3 +22,9 @@ export LESS="-iSQR"
 cht() {
     curl https://cht.sh/$1 | /usr/bin/env less
 }
+
+precmd_stty_sane() {
+    stty sane
+}
+
+precmd_functions+=(precmd_stty_sane)
