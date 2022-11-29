@@ -21,12 +21,12 @@ __autoinit_jiq_install() {
     [[ -d "$HOME/.local/bin" ]] || mkdir -p "$HOME/.local/bin"
 
     tmpdir="$(mktemp -d)"
-    
+
     (
         set -e
         cd "$tmpdir"
-        curl -L https://github.com/fiatjaf/jiq/releases/download/v0.7.2/jiq_linux_amd64 -o ./jiq
-        
+        curl -sL https://github.com/fiatjaf/jiq/releases/download/v0.7.2/jiq_linux_amd64 -o ./jiq
+
         chmod +x ./jiq
         mv ./jiq "$HOME/.local/bin"
     )
@@ -34,7 +34,7 @@ __autoinit_jiq_install() {
     if [[ $? -eq 0 ]]; then
         eval "$(__autoinit_jiq_init)"
     fi
-    
+
     if [[ -d "$tmpdir" ]]; then
         rm -rf "$tmpdir"
     fi
@@ -89,6 +89,8 @@ __autoinit_jiq_autoload() {
 }
 
 __autoinit_jiq_autorun() {
+    echo "autoinit-jiq/autorun: params=$@"
+    shift
     ARGV="$@"
 
     __autoinit_jiq_autoload || return 254
