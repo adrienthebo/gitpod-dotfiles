@@ -43,8 +43,14 @@ __autoinit_aws_configure() {
     fi
 
     __autoinit_debug "$(color blue "autoinit-aws: Forcing AWS config to just use SSO credentials")"
-    [[ -d /home/gitpod/.aws ]] || mkdir /home/gitpod/.aws
-    cat <<- AWSFILE > /home/gitpod/.aws/config
+
+
+
+    config_file="${AWS_CONFIG_FILE:-$HOME/.aws/config}"
+    config_dir="$(dirname "$config_file")"
+
+    [[ -d "$config_dir" ]] || mkdir "$config_dir"
+    cat <<- AWSFILE > "$config_file"
 [default]
 sso_start_url = ${AWS_SSO_URL}
 sso_region = ${AWS_SSO_REGION}
@@ -95,6 +101,9 @@ __autoinit_aws_describe() {
 Configure awscliv2, load AWS credentials, and configure EKS kubectl credentials.
 
 Environment variables:
+    - awscli:
+        - AWS_CONFIG_FILE="${AWS_CONFIG_FILE}"
+        - AWS_SHARED_CREDENTIALS_FILE="${AWS_SHARED_CREDENTIALS_FILE}"
     - API access (used with 'aws sso login'):
         - AWS_SSO_URL="${AWS_SSO_URL}"
         - AWS_SSO_REGION="${AWS_SSO_REGION}"
