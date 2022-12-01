@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+git config --global core.excludesFile "$HOME/.gitignore"
+
 git config --global push.autoSetupRemote true
 git config --global push.default current
 
