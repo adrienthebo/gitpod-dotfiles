@@ -25,6 +25,9 @@ cht() {
 
 precmd_stty_sane() {
     stty sane
+    # Put terminal in application mode (vs normal mode)
+    # See also: https://github.com/pulumi/pulumi/issues/1621
+    tput rmkx
 }
 
 precmd_functions+=(precmd_stty_sane)
