@@ -97,6 +97,7 @@ AWSFILE
 
 
 __autoinit_aws_describe() {
+    # see also: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html
     cat - <<EOD
 Configure awscliv2, load AWS credentials, and configure EKS kubectl credentials.
 
@@ -105,12 +106,12 @@ Environment variables:
         - AWS_CONFIG_FILE="${AWS_CONFIG_FILE}"
         - AWS_SHARED_CREDENTIALS_FILE="${AWS_SHARED_CREDENTIALS_FILE}"
         - AWS_PROFILE="${AWS_PROFILE}"
-    - API access (used with 'aws sso login'):
+        - AWS_REGION="${AWS_REGION}"
+    - AWS SSO:
         - AWS_SSO_URL="${AWS_SSO_URL}"
         - AWS_SSO_REGION="${AWS_SSO_REGION}"
         - AWS_ACCOUNT_ID="${AWS_ACCOUNT_ID}"
         - AWS_ROLE_NAME="${AWS_ROLE_NAME}"
-        - AWS_REGION="${AWS_REGION}"
     - EKS (used with 'aws eks update-kubeconfig'):
         - EKS_CLUSTER="${EKS_CLUSTER}"
 EOD
