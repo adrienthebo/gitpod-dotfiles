@@ -16,6 +16,6 @@ for plugin in "${autoinit_plugins[@]}"; do
     autoinit init-plugin "$plugin"
 done
 
-for plugin in atuin; do
+for plugin in atuin direnv; do
     autoinit configure "$plugin"
 done
