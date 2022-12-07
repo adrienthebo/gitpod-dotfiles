@@ -1,0 +1,24 @@
+# leeway
+
+> Leeway is a heavily caching build system for Go, Yarn and Docker projects.
+> More information: <https://github.com/gitpod-io/leeway>.
+
+- List resources within a workspace:
+
+`leeway collect {{components|packages|scripts|files}}`
+
+- Show a tree of dependencies for a given package/component:
+
+`leeway describe tree {{path/to/dir:package}}`
+
+- Build a package:
+
+`leeway build {{path/to/dir:package}}`
+
+- Describe a script:
+
+`leeway describe script {{path/to/dir:script}}`
+
+- Run a specific script:
+
+`leeway run {{path/to/dir:script}} [-D BUILDARG=arg]`
