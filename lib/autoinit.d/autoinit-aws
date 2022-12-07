@@ -42,8 +42,7 @@ __autoinit_aws_configure() {
         return 1
     fi
 
-    __autoinit_debug "$(color blue "autoinit-aws: Forcing AWS config to just use SSO credentials")"
-
+    __autoinit_info "autoinit-aws: Forcing AWS config to just use SSO credentials"
 
 
     config_file="${AWS_CONFIG_FILE:-$HOME/.aws/config}"
@@ -79,18 +78,22 @@ def kv: to_entries[] | "\(.key)=\(.value)";
         echo '{}' > /home/gitpod/.docker/config.json
     fi
 
-    __autoinit_debug "autoinit-aws: Ensuring Docker Config uses ecr-login for ECR repositories"
+    __autoinit_info "autoinit-aws: Ensuring Docker Config uses ecr-login for ECR repositories"
 
     cp /home/gitpod/.docker/config.json /home/gitpod/.docker/config_bak.json
     jq '.credHelpers["public.ecr.aws"]="ecr-login"' /home/gitpod/.docker/config.json > /home/gitpod/.docker/config_tmp.json
     jq ".credHelpers[\"${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com\"]=\"ecr-login\"" /home/gitpod/.docker/config_tmp.json > /home/gitpod/.docker/config.json
     rm /home/gitpod/.docker/config_tmp.json
 
-    echo "$(color blue "autoinit-aws: Start an AWS SSO login session")"
+    local sso_account_id="$(aws configure get sso_account_id)"
+    local sso_role_name="$(aws configure get sso_role_name)"
+    local aws_profile="${AWS_PROFILE:-default}"
+
 
     if aws sts get-caller-identity 1>/dev/null 2>/dev/null; then
-        echo "$(color blue "autoinit-aws: AWS credentials already loaded, run 'aws sso login' to re-authenticate")"
+        __autoinit_info "autoinit-aws: AWS credentials already loaded, run 'aws sso login' to re-authenticate"
     else
+        __autoinit_info "autoinit-aws: Start an AWS SSO login session, profile=$aws_profile, account_id=$sso_account_id, role_name=$sso_role_name"
         BROWSER="/ide/bin/helpers/browser.sh" aws sso login
         if [[ $? -ne 0 ]]; then
             __autoinit_warn "autoinit-aws: SSO login failed - finishing aws configuration early"
@@ -101,7 +104,7 @@ def kv: to_entries[] | "\(.key)=\(.value)";
     fi
 
     if [[ -n $EKS_CLUSTER ]]; then
-        echo "$(color blue "autoinit-aws: load kubectl configuration for $EKS_CLUSTER")"
+        __autoinit_info "autoinit-aws: load kubectl configuration for $EKS_CLUSTER"
         aws eks update-kubeconfig --name "$EKS_CLUSTER"
     fi
 }
