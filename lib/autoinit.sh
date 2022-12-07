@@ -33,6 +33,7 @@ __autoinit_install() {
 
     declare -a failed_plugins=()
     for plugin in "${plugins[@]}"; do
+        __autoinit_debug "autoinit/install: calling '$__AUTOINIT_DIR/autoinit-$plugin install'"
         "$__AUTOINIT_DIR/autoinit-$plugin" install
         if [[ $? -ne 0 ]]; then
             failed_plugins+=("$plugin")
@@ -223,6 +224,7 @@ __autoinit_register_default_plugins() {
     __autoinit_register "asdf"         "${__AUTOINIT_DIR}/autoinit-asdf"
     __autoinit_register "atuin"        "${__AUTOINIT_DIR}/autoinit-atuin"
     __autoinit_register "aws"          "${__AUTOINIT_DIR}/autoinit-aws"
+    __autoinit_register "aws-profile"  "${__AUTOINIT_DIR}/autoinit-aws-profile"
     __autoinit_register "bat"          "${__AUTOINIT_DIR}/autoinit-bat"
     __autoinit_register "cmctl"        "${__AUTOINIT_DIR}/autoinit-cmctl"
     __autoinit_register "direnv"       "${__AUTOINIT_DIR}/autoinit-direnv"

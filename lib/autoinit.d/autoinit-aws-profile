@@ -1,0 +1,148 @@
+#!/usr/bin/env bash
+
+
+AUTOINIT_D="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
+__LIBDIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")"
+source "${__LIBDIR}/colors.sh"
+source "${__LIBDIR}/autoinit-logging.sh"
+
+__autoinit_aws_profile_init() {
+    cat - <<EOD
+source $HOME/.local/src/awscli-profile-credential-helpers/aws-profile
+source $HOME/.local/src/awscli-profile-credential-helpers/aws-console-completion.bash
+source $HOME/.local/src/awscli-profile-credential-helpers/aws-profile-completion.bash
+EOD
+}
+
+
+__autoinit_aws_profile_check_deps() {
+    if ! command -v python3 2>/dev/null; then
+        __autoinit_error "${FUNCNAME[0]}: python3 not present, cannot install"
+        return 1
+    fi
+
+    if ! command -v pip3 2>/dev/null; then
+        __autoinit_error "${FUNCNAME[0]}: pip3 not present, cannot install"
+        return 1
+    fi
+    if ! command -v git 2> /dev/null; then
+        __autoinit_error "${FUNCNAME[0]}: git not present, cannot install"
+        return 1
+    fi
+
+    return 0
+}
+
+__autoinit_aws_profile_install() {
+    __autoinit_aws_profile_check_deps || return 1
+
+    local ap_dir="$HOME/.local/src/awscli-profile-credential-helpers"
+    mkdir -p $HOME/.local/src || true
+    git clone https://github.com/aws-samples/awscli-profile-credential-helpers "$ap_dir"
+    (cd $ap_dir && pip3 install -r requirements.txt)
+
+    for executable in aws-{whoami,console,refresh-credentials}; do
+        cp "$ap_dir/${executable}" "$HOME/.local/bin"
+    done
+}
+
+__autoinit_aws_profile_is_installed() {
+    [[ -d "$HOME/.local/src/awscli-profile-credential-helpers" ]]
+}
+
+__autoinit_aws_profile_is_ready() {
+    __autoinit_aws_profile_is_installed && ! __autoinit_aws_profile_is_active
+}
+
+__autoinit_aws_profile_is_active() {
+    [[ $(type -t aws-profile) == "function" ]]
+}
+
+__autoinit_aws_profile_is_shadowed() {
+    # todo
+    return 1
+}
+
+__autoinit_aws_profile_describe() {
+    cat - <<EOD
+# aws-profile
+
+> Manage multiple AWS profiles.
+> More information: <https://github.com/aws-samples/awscli-profile-credential-helpers>.
+
+Example config:
+
+    [default]
+    output=json
+
+    [profile user-profile]
+    region = us-west-2
+
+    [profile role-profile]
+    source_profile = user-profile
+    role_arn = arn:aws:iam::123456789100:role/example
+
+    [profile sso-profile]
+    sso_start_url = https://example-domain.awsapps.com/start
+    sso_region = us-west-2
+    sso_account_id = 123456789100
+    sso_role_name = ExampleRole
+EOD
+}
+
+main() {
+    local cmd="$1"
+
+    case "$cmd" in
+        init)
+            __autoinit_aws_profile_init
+            ;;
+
+        install)
+            __autoinit_aws_profile_install
+            ;;
+
+        is-installed)
+            __autoinit_aws_profile_is_installed
+            ;;
+
+        is-active)
+            __autoinit_aws_profile_is_active
+            ;;
+
+        is-ready)
+            __autoinit_aws_profile_is_installed
+            ;;
+
+        is-shadowed)
+            __autoinit_aws_profile_is_shadowed
+            ;;
+
+        autoload)
+            __autoinit_aws_profile_autoload
+            ;;
+
+        autorun)
+            __autoinit_aws_profile_autorun
+            ;;
+
+        configure)
+            __autoinit_aws_profile_configure
+            ;;
+
+        describe)
+            __autoinit_aws_profile_describe
+            ;;
+
+        *)
+            __autoinit_error "Unhandled command $cmd"
+            echo "Usage: $0 [init|install|is-active|is-installed]" 1>&2
+            ;;
+
+    esac
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    # shellcheck disable=SC2068
+    main $@
+fi
