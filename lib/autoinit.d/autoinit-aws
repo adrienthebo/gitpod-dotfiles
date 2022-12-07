@@ -59,6 +59,17 @@ sso_role_name = ${AWS_ROLE_NAME}
 region = ${AWS_REGION}
 AWSFILE
 
+    if [[ -n $AWS_CONFIGURATION ]]; then
+    jq -r >> "$config_file" '
+def kv: to_entries[] | "\(.key)=\(.value)";
+
+[
+    to_entries[]
+    | "[profile \(.key)]", (.value|kv)
+]
+| join("\n")' <<< "$AWS_CONFIGURATION"
+    fi
+
     # update docker config to use ecr-login
     # if we don't have a .docker/config.json, create:
 
@@ -99,7 +110,10 @@ AWSFILE
 __autoinit_aws_describe() {
     # see also: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html
     cat - <<EOD
-Configure awscliv2, load AWS credentials, and configure EKS kubectl credentials.
+# aws
+
+> Configure awscliv2, load AWS credentials, and configure EKS kubectl credentials.
+> More information: <https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html>.
 
 Environment variables:
     - awscli:
