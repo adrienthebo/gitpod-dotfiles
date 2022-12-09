@@ -14,7 +14,6 @@ source $HOME/.local/src/awscli-profile-credential-helpers/aws-profile-completion
 EOD
 }
 
-
 __autoinit_aws_profile_check_deps() {
     if ! command -v python3 2>/dev/null; then
         __autoinit_error "${FUNCNAME[0]}: python3 not present, cannot install"
@@ -41,7 +40,7 @@ __autoinit_aws_profile_install() {
     git clone https://github.com/adrienthebo/awscli-profile-credential-helpers "$ap_dir"
     (cd $ap_dir && pip3 install -r requirements.txt)
 
-    for executable in aws-{whoami,console,refresh-credentials}; do
+    for executable in aws-{whoami,console,refresh-credentials,start}; do
         cp "$ap_dir/${executable}" "$HOME/.local/bin"
     done
 }
@@ -61,6 +60,27 @@ __autoinit_aws_profile_is_active() {
 __autoinit_aws_profile_is_shadowed() {
     # todo
     return 1
+}
+
+__autoinit_aws_profile_autorun() {
+    __autoinit_aws_profile_autoload
+    if [[ $? -ne 0 ]]; then
+        return $?
+    fi
+
+    # shellcheck disable=SC2068
+    aws-profile $@
+}
+
+__autoinit_aws_profile_autoload() {
+    if ! __autoinit_aws_profile_is_installed; then
+        __autoinit_aws_profile_install
+        if [[ $? -ne 0 ]]; then
+            return $?
+        fi
+
+    fi
+    eval "$(__autoinit_aws_profile_init)"
 }
 
 __autoinit_aws_profile_describe() {
@@ -92,6 +112,7 @@ EOD
 
 main() {
     local cmd="$1"
+    shift
 
     case "$cmd" in
         init)
@@ -123,7 +144,8 @@ main() {
             ;;
 
         autorun)
-            __autoinit_aws_profile_autorun
+            # shellcheck disable=SC2068
+            __autoinit_aws_profile_autorun $@
             ;;
 
         configure)
