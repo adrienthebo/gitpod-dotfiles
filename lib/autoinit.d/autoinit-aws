@@ -116,21 +116,25 @@ __autoinit_aws_describe() {
 # aws
 
 > Configure awscliv2, load AWS credentials, and configure EKS kubectl credentials.
+> See also: aws-profile
 > More information: <https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html>.
 
-Environment variables:
-    - awscli:
-        - AWS_CONFIG_FILE="${AWS_CONFIG_FILE}"
-        - AWS_SHARED_CREDENTIALS_FILE="${AWS_SHARED_CREDENTIALS_FILE}"
-        - AWS_PROFILE="${AWS_PROFILE}"
-        - AWS_REGION="${AWS_REGION}"
-    - AWS SSO:
-        - AWS_SSO_URL="${AWS_SSO_URL}"
-        - AWS_SSO_REGION="${AWS_SSO_REGION}"
-        - AWS_ACCOUNT_ID="${AWS_ACCOUNT_ID}"
-        - AWS_ROLE_NAME="${AWS_ROLE_NAME}"
-    - EKS (used with 'aws eks update-kubeconfig'):
-        - EKS_CLUSTER="${EKS_CLUSTER}"
+## Environment variables
+
+- awscli:
+    - AWS_CONFIG_FILE="${AWS_CONFIG_FILE}"
+    - AWS_SHARED_CREDENTIALS_FILE="${AWS_SHARED_CREDENTIALS_FILE}"
+    - AWS_PROFILE="${AWS_PROFILE}"
+    - AWS_REGION="${AWS_REGION}"
+- AWS SSO:
+    - AWS_SSO_URL="${AWS_SSO_URL}"
+    - AWS_SSO_REGION="${AWS_SSO_REGION}"
+    - AWS_ACCOUNT_ID="${AWS_ACCOUNT_ID}"
+    - AWS_ROLE_NAME="${AWS_ROLE_NAME}"
+- EKS (used with 'aws eks update-kubeconfig'):
+    - EKS_CLUSTER="${EKS_CLUSTER}"
+- autoinit-aws:
+    - AWS_CONFIGURATION="${AWS_CONFIGURATION}"
 EOD
 }
 
