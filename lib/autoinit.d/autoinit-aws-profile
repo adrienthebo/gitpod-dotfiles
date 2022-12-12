@@ -15,16 +15,16 @@ EOD
 }
 
 __autoinit_aws_profile_check_deps() {
-    if ! command -v python3 2>/dev/null; then
+    if ! command -v python3 2>/dev/null 1>/dev/null; then
         __autoinit_error "${FUNCNAME[0]}: python3 not present, cannot install"
         return 1
     fi
 
-    if ! command -v pip3 2>/dev/null; then
+    if ! command -v pip3 2>/dev/null 1>/dev/null; then
         __autoinit_error "${FUNCNAME[0]}: pip3 not present, cannot install"
         return 1
     fi
-    if ! command -v git 2> /dev/null; then
+    if ! command -v git 2> /dev/null >/dev/null; then
         __autoinit_error "${FUNCNAME[0]}: git not present, cannot install"
         return 1
     fi
