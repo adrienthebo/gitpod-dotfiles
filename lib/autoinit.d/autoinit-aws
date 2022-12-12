@@ -72,18 +72,22 @@ def kv: to_entries[] | "\(.key)=\(.value)";
     # update docker config to use ecr-login
     # if we don't have a .docker/config.json, create:
 
-    if [ ! -d /home/gitpod/.docker ]; then
-        mkdir -p /home/gitpod/.docker && echo '{}' > /home/gitpod/.docker/config.json
-    elif [ ! -f /home/gitpod/.docker/config.json ]; then
-        echo '{}' > /home/gitpod/.docker/config.json
+    if [[ -n $AUTOINIT_AWS_SETUP_REGISTRY ]]; then
+        if [ ! -d /home/gitpod/.docker ]; then
+            mkdir -p /home/gitpod/.docker && echo '{}' > /home/gitpod/.docker/config.json
+        elif [ ! -f /home/gitpod/.docker/config.json ]; then
+            echo '{}' > /home/gitpod/.docker/config.json
+        fi
+
+        __autoinit_info "autoinit-aws: Ensuring Docker Config uses ecr-login for ECR repositories"
+
+        cp /home/gitpod/.docker/config.json /home/gitpod/.docker/config_bak.json
+        jq '.credHelpers["public.ecr.aws"]="ecr-login"' /home/gitpod/.docker/config.json > /home/gitpod/.docker/config_tmp.json
+        jq ".credHelpers[\"${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com\"]=\"ecr-login\"" /home/gitpod/.docker/config_tmp.json > /home/gitpod/.docker/config.json
+        rm /home/gitpod/.docker/config_tmp.json
+    else
+        __autoinit_info "autoinit-aws: skipping docker registry setup"
     fi
-
-    __autoinit_info "autoinit-aws: Ensuring Docker Config uses ecr-login for ECR repositories"
-
-    cp /home/gitpod/.docker/config.json /home/gitpod/.docker/config_bak.json
-    jq '.credHelpers["public.ecr.aws"]="ecr-login"' /home/gitpod/.docker/config.json > /home/gitpod/.docker/config_tmp.json
-    jq ".credHelpers[\"${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com\"]=\"ecr-login\"" /home/gitpod/.docker/config_tmp.json > /home/gitpod/.docker/config.json
-    rm /home/gitpod/.docker/config_tmp.json
 
     local sso_account_id="$(aws configure get sso_account_id)"
     local sso_role_name="$(aws configure get sso_role_name)"
@@ -91,9 +95,9 @@ def kv: to_entries[] | "\(.key)=\(.value)";
 
 
     if aws sts get-caller-identity 1>/dev/null 2>/dev/null; then
-        __autoinit_info "autoinit-aws: AWS credentials already loaded, run 'aws sso login' to re-authenticate"
+        __autoinit_warn "autoinit-aws: AWS credentials already loaded, run 'aws sso login' to re-authenticate"
     else
-        __autoinit_info "autoinit-aws: Start an AWS SSO login session, profile=$aws_profile, account_id=$sso_account_id, role_name=$sso_role_name"
+        __autoinit_notice "autoinit-aws: Start an AWS SSO login session, profile=$aws_profile, account_id=$sso_account_id, role_name=$sso_role_name"
         BROWSER="/ide/bin/helpers/browser.sh" aws sso login
         if [[ $? -ne 0 ]]; then
             __autoinit_warn "autoinit-aws: SSO login failed - finishing aws configuration early"
@@ -135,6 +139,7 @@ __autoinit_aws_describe() {
     - EKS_CLUSTER="${EKS_CLUSTER}"
 - autoinit-aws:
     - AWS_CONFIGURATION="${AWS_CONFIGURATION}"
+    - AUTOINIT_AWS_SETUP_REGISTRY="${AUTOINIT_AWS_SETUP_REGISTRY}"
 EOD
 }
 
