@@ -24,6 +24,11 @@ __autoinit_atuin_install() {
             curl https://raw.githubusercontent.com/rcaloras/bash-preexec/master/bash-preexec.sh -o ~/.bash-preexec.sh
         fi
     fi
+
+    declare atuin_cachedir="$HOME/.cache/atuin"
+    if ! [[ -d $atuin_cachedir ]]; then
+        mkdir -p "$atuin_cachedir"
+    fi
 }
 
 
@@ -109,6 +114,12 @@ CONFIG
         __autoinit_warn "autoinit-atuin cannot login, missing one of [ATUIN_USERNAME, ATUIN_PASSWORD, ATUIN_KEY]"
     fi
     atuin sync
+
+  if \
+      ! [[ -s "$HOME/.cache/atuin/pidfile" ]] \
+      || ! kill -0 "$(cat "$HOME/.cache/atuin/pidfile")"; then
+      bash -c "(echo \$BASHPID > \"$HOME/.cache/atuin/pidfile\"; trap 'atuin sync; rm \"$HOME/.cache/atuin/pidfile\"' EXIT; sleep infinity) 1>>$HOME/.cache/atuin/logs 2>>$HOME/.cache/atuin/logs & disown"
+  fi
 }
 
 
