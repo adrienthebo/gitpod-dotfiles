@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+if command -v atuin 1>/dev/null 2>/dev/null; then
+    atuin sync
+fi
