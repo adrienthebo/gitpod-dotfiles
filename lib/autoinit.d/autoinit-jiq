@@ -89,7 +89,6 @@ __autoinit_jiq_autoload() {
 }
 
 __autoinit_jiq_autorun() {
-    echo "autoinit-jiq/autorun: params=$@"
     shift
     ARGV="$@"
 
