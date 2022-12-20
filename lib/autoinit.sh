@@ -229,6 +229,7 @@ __autoinit_register_default_plugins() {
     __autoinit_register "cmctl"        "${__AUTOINIT_DIR}/autoinit-cmctl"
     __autoinit_register "direnv"       "${__AUTOINIT_DIR}/autoinit-direnv"
     __autoinit_register "eksctl"       "${__AUTOINIT_DIR}/autoinit-eksctl"
+    __autoinit_register "fd"           "${__AUTOINIT_DIR}/autoinit-fd"
     __autoinit_register "fzf"          "${__AUTOINIT_DIR}/autoinit-fzf"
     __autoinit_register "gcloud"       "${__AUTOINIT_DIR}/autoinit-gcloud"
     __autoinit_register "helm"         "${__AUTOINIT_DIR}/autoinit-helm"
@@ -238,7 +239,7 @@ __autoinit_register_default_plugins() {
     __autoinit_register "kubectl-krew" "${__AUTOINIT_DIR}/autoinit-kubectl-krew" "binstub"
     __autoinit_register "lsd"          "${__AUTOINIT_DIR}/autoinit-lsd"
     __autoinit_register "tldr"         "${__AUTOINIT_DIR}/autoinit-tldr"
-    __autoinit_register "chezmoi"         "${__AUTOINIT_DIR}/autoinit-chezmoi"
+    __autoinit_register "chezmoi"      "${__AUTOINIT_DIR}/autoinit-chezmoi"
 }
 
 
