@@ -118,7 +118,7 @@ CONFIG
   if \
       ! [[ -s "$HOME/.cache/atuin/pidfile" ]] \
       || ! kill -0 "$(cat "$HOME/.cache/atuin/pidfile")"; then
-      bash -c "(echo \$BASHPID > \"$HOME/.cache/atuin/pidfile\"; trap 'atuin sync; rm \"$HOME/.cache/atuin/pidfile\"' EXIT; while true; do sleep 120; date >>$HOME/.cache/atuin/logs; atuin sync; done) 1>>$HOME/.cache/atuin/logs 2>>$HOME/.cache/atuin/logs & disown"
+      bash -c "(echo \$BASHPID > \"$HOME/.cache/atuin/pidfile\"; trap 'atuin sync; rm \"$HOME/.cache/atuin/pidfile\"' TERM INT HUP EXIT; while true; do sleep 120; date >>$HOME/.cache/atuin/logs; atuin sync; done) 1>>$HOME/.cache/atuin/logs 2>>$HOME/.cache/atuin/logs & disown"
   fi
 }
 
