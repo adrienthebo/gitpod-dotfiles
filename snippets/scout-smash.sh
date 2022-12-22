@@ -17,5 +17,6 @@ leeway run bootstrap/lambdas/application/addons/manifests:publish-addons-bundle 
 
 echo "Waiting 30s for addons to install"
 sleep 30
+until kubectl get secret database; do sleep 5; done
 
 leeway run bootstrap/lambdas/application:publish-installer-bundle   -DclusterName="${CELL_NAME}-meta" -DclusterType=meta   -Dkind=webapp   -Dimage=$CELL_INSTALLER_IMAGE
