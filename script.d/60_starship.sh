@@ -12,6 +12,7 @@ cat - > ~/.config/starship.toml <<'EOD'
 format = """
 $kubernetes\
 $directory\
+$time\
 $vcsh\
 $git_branch\
 $git_commit\
@@ -35,4 +36,8 @@ $line_break\
 $jobs\
 $os\
 $character"""
+
+[time]
+format = ' [$time]($style) '
+disabled = false
 EOD
