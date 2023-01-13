@@ -17,6 +17,10 @@ fi
 alias k="kubectl"
 alias tf="terraform"
 
+if command -v pulumi 1>/dev/null 2>&1 ; then
+    alias pulumi="tput rmkx; pulumi"
+fi
+
 export LESS="-iSQR"
 
 cht() {
