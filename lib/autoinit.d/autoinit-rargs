@@ -1,0 +1,180 @@
+#!/usr/bin/env bash
+
+__LIBDIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")"
+source "${__LIBDIR}/colors.sh"
+source "${__LIBDIR}/functions.sh"
+source "${__LIBDIR}/autoinit.sh"
+
+__autoinit_rargs_init() {
+    # shellcheck disable=SC2016
+    cat - <<EOD
+if [[ -d "\$HOME/.local/bin" ]]; then
+    if ! [[ \$PATH =~ "\$HOME/.local/bin" ]]; then
+        export PATH="\$PATH:\$HOME/.local/bin"
+    fi
+fi
+EOD
+}
+
+
+__autoinit_rargs_install() {
+    [[ -d "$HOME/.local/bin" ]] || mkdir -p "$HOME/.local/bin"
+
+    tmpdir="$(mktemp -d)"
+
+    local rargs_version="v0.3.0"
+    local rargs_basename="rargs-${rargs_version}-x86_64-unknown-linux-musl.tar.gz"
+    (
+        set -e
+        cd "$tmpdir"
+        curl -LO "https://github.com/lotabout/rargs/releases/download/${rargs_version}/${rargs_basename}"
+        tar -xvf "$rargs_basename"
+
+        cp ./rargs "$HOME/.local/bin/rargs"
+    )
+
+    if [[ $? -eq 0 ]]; then
+        eval "$(__autoinit_rargs_init)"
+    fi
+
+    if [[ -d "$tmpdir" ]]; then
+        rm -rf "$tmpdir"
+    fi
+}
+
+
+__autoinit_rargs_is_active() {
+    command -v rargs 1>/dev/null
+    return $?
+}
+
+
+__autoinit_rargs_is_installed() {
+    [[ -f "$HOME/.local/bin/rargs" ]]
+    return $?
+}
+
+
+__autoinit_rargs_is_ready() {
+    if __autoinit_rargs_is_installed && ! __autoinit_rargs_is_active && ! command -v gcloud 1>/dev/null; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+
+__autoinit_rargs_is_shadowed() {
+    if ! command -v rargs 1>/dev/null; then
+        return 0
+    elif [[ "$(which rargs)" == "$HOME/.local/bin/rargs" ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+
+__autoinit_rargs_autoload() {
+    if ! __autoinit_rargs_is_installed ; then
+        __autoinit_rargs_install
+        rc=$?
+        if [[ $rc -ne 0 ]]; then
+            return $rc
+        fi
+    fi
+
+    if ! __autoinit_rargs_is_active ; then
+        eval "$(__autoinit_rargs_init)"
+    fi
+}
+
+__autoinit_rargs_autorun() {
+    ARGV="$@"
+
+    __autoinit_rargs_autoload || return 254
+
+    $ARGV
+    return $?
+}
+
+
+__autoinit_rargs_describe() {
+
+    cat - <<EOD
+# rargs
+
+> xargs + awk with pattern-matching support.
+> More information: <https://github.com/lotabout/rargs>.
+
+## Examples:
+
+- Batch rename files:
+
+'ls *.bak | rargs -p '(.*)\.bak' mv {0} {1}'
+
+- Use named regex captures:
+
+'cat download-list.csv | rargs -p '(?P<url>.*),(?P<filename>.*)' wget {url} -O {filename}'
+
+- Extract and format columns:
+
+'cat /etc/passwd | rargs -d: echo -e 'id: "{1}"\t name: "{5}"\t rest: "{6..::}"''
+
+EOD
+}
+
+main() {
+    ARG="$1"
+    shift
+    case "$ARG" in
+        "init")
+            __autoinit_rargs_init
+            ;;
+
+        "install")
+            __autoinit_rargs_install
+            ;;
+
+        "is-active")
+            __autoinit_rargs_is_active
+            ;;
+
+        "is-installed")
+            __autoinit_rargs_is_installed
+            ;;
+
+        "is-ready")
+            __autoinit_rargs_is_ready
+            ;;
+
+        "is-shadowed")
+            __autoinit_rargs_is_shadowed
+            ;;
+
+        "autoload")
+            __autoinit_rargs_autoload
+            ;;
+
+        "autorun")
+            shift
+            __autoinit_rargs_autorun "$@"
+            exit $?
+            ;;
+
+        "describe")
+            __autoinit_rargs_describe
+            ;;
+
+        *)
+            echo "Usage: $0 [init|install|is-active|is-installed]" 1>&2
+            ;;
+    esac
+
+}
+
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    # shellcheck disable=SC2068
+    main $@
+fi
