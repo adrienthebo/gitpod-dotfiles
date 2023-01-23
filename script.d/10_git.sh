@@ -34,3 +34,4 @@ git config --global alias.lg "log --pretty=format:'%C(yellow)%h%C(reset) %C(blue
 git config --global alias.forward 'pull --ff-only'
 git config --global alias.redo 'commit --amend -C HEAD'
 git config --global alias.where 'rev-parse --abbrev-ref HEAD'
+git config --global alias.co "! bash -c \"f() { git branch | tr -cd '[[:alnum:]-_/\n]' |fzf --preview 'git log --color=always -1 -p {}' | xargs --no-run-if-empty git checkout ; } ; f\""
